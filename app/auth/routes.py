@@ -5,6 +5,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
 from app import db
 from app.models import User
+from app.utils import safe_redirect_target
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -76,10 +77,10 @@ def login():
         if user and user.check_password(password):
             login_user(user, remember=bool(remember))
             flash(f'Welcome back, {user.username}!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('main.home'))
-        else:
-            flash('Invalid email or password.', 'error')
+            # Only follow ?next= when it points back to this site (no open redirects)
+            return redirect(safe_redirect_target(request.args.get('next'), fallback=url_for('main.home')))
+        flash('Invalid email or password.', 'error')
+        return render_template('auth/login.html', email=email)
 
     return render_template('auth/login.html')
 
@@ -101,6 +102,10 @@ def profile():
         username = request.form.get('username', '').strip()
         phone = request.form.get('phone', '').strip()
         address = request.form.get('address', '').strip()
+
+        if len(username) < 3:
+            flash('Username must be at least 3 characters.', 'error')
+            return redirect(url_for('auth.profile'))
 
         # Check username unique
         existing = User.query.filter_by(username=username).first()

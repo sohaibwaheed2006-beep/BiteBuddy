@@ -1,178 +1,197 @@
 {% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
 
-{% block title %}{{ item.name }} - BiteBuddy{% endblock %}
+{% block title %}{{ item.name }} — BiteBuddy{% endblock %}
+{% block meta_description %}{{ item.description }} — order {{ item.name }} from BiteBuddy for Rs. {{ "%.0f"|format(item.price) }}.{% endblock %}
 
 {% block content %}
-<!-- Back Navigation -->
-<div class="mb-6 select-none">
-    <a href="{{ url_for('menu.browse', category=item.category_id) }}" class="text-sm text-neutral-400 hover:text-brand-orange flex items-center gap-2 transition-all">
-        <i class="bi bi-arrow-left"></i> Back to {{ item.category.name }}
-    </a>
-</div>
+{% set cat_name = item.category.name if item.category else '' %}
+{% set kind3d = 'pizza' if cat_name == 'Pizza' else ('burger' if cat_name == 'Burgers' else None) %}
 
-<!-- Main Showcase Container -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-brand-charcoal/50 border border-white/5 p-6 md:p-10 rounded-[32px] shadow-glass backdrop-blur-md items-start">
-    
-    <!-- Left Column: Media Presentation -->
-    <div class="w-full relative group">
-        <!-- Orange Glow backdrop -->
-        <div class="absolute inset-0 bg-brand-orange/10 rounded-3xl filter blur-3xl opacity-50 group-hover:opacity-85 transition-all duration-500"></div>
-        
-        <div class="relative overflow-hidden rounded-3xl border border-white/10 shadow-glass aspect-[4/3] w-full">
-            <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" onerror="this.src='/static/images/default_food.jpg'">
-        </div>
-    </div>
-    
-    <!-- Right Column: Interactive Console -->
-    <div class="flex flex-col h-full gap-6 select-none">
-        
-        <div class="flex flex-col gap-2">
-            <span class="bg-brand-orange/15 border border-brand-orange/30 text-brand-orange text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full w-max">
-                {{ item.category.name }}
-            </span>
-            <h1 class="text-3xl sm:text-4xl font-display font-black text-white leading-tight mt-1">{{ item.name }}</h1>
-            <h2 id="main-price" class="text-3xl font-display font-black text-brand-orange" data-base-price="{{ item.price }}">Rs. {{ "%.0f"|format(item.price) }}</h2>
-        </div>
-        
-        <p class="text-sm text-neutral-400 leading-relaxed border-t border-white/5 pt-4">
-            {{ item.description }}
-        </p>
-        
-        <!-- Customization Console Form -->
-        <div class="border-t border-white/5 pt-6 mt-2">
-            {% if current_user.is_authenticated %}
-            <form action="{{ url_for('cart.add_to_cart', item_id=item.id) }}" method="POST" class="add-to-cart-form flex flex-col gap-6">
-                
-                <!-- Pizza Customizer: Sizes -->
-                {% if item.category.name == 'Pizza' or item.category_id == 3 %}
-                <div class="bg-white/5 border border-white/5 p-5 rounded-2xl">
-                    <h4 class="text-sm font-bold text-white mb-3 uppercase tracking-wider flex items-center gap-2"><i class="bi bi-arrows-angle-expand text-brand-orange"></i> Select Size</h4>
-                    <div class="flex flex-col gap-2.5">
-                        <label class="flex items-center justify-between p-3.5 bg-neutral-900 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 hover:border-white/10 transition-all group has-[:checked]:border-brand-orange has-[:checked]:bg-brand-orange/5">
-                            <div class="flex items-center gap-3">
-                                <input type="radio" name="size" value="Small|0" onchange="updatePrice()" class="w-4 h-4 accent-brand-orange cursor-pointer" required>
-                                <span class="text-sm font-semibold text-white">Small</span>
-                            </div>
-                            <span class="text-sm font-bold text-neutral-400 group-has-[:checked]:text-brand-orange">Rs. {{ "%.0f"|format(item.price) }}</span>
-                        </label>
-                        
-                        <label class="flex items-center justify-between p-3.5 bg-neutral-900 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 hover:border-white/10 transition-all group has-[:checked]:border-brand-orange has-[:checked]:bg-brand-orange/5">
-                            <div class="flex items-center gap-3">
-                                <input type="radio" name="size" value="Medium|200" onchange="updatePrice()" class="w-4 h-4 accent-brand-orange cursor-pointer" required checked>
-                                <span class="text-sm font-semibold text-white">Medium</span>
-                            </div>
-                            <span class="text-sm font-bold text-neutral-400 group-has-[:checked]:text-brand-orange">Rs. {{ "%.0f"|format(item.price + 200) }}</span>
-                        </label>
-                        
-                        <label class="flex items-center justify-between p-3.5 bg-neutral-900 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 hover:border-white/10 transition-all group has-[:checked]:border-brand-orange has-[:checked]:bg-brand-orange/5">
-                            <div class="flex items-center gap-3">
-                                <input type="radio" name="size" value="Large|400" onchange="updatePrice()" class="w-4 h-4 accent-brand-orange cursor-pointer" required>
-                                <span class="text-sm font-semibold text-white">Large</span>
-                            </div>
-                            <span class="text-sm font-bold text-neutral-400 group-has-[:checked]:text-brand-orange">Rs. {{ "%.0f"|format(item.price + 400) }}</span>
-                        </label>
-                    </div>
+<nav class="flex items-center gap-2 text-sm text-neutral-500 mb-6" aria-label="Breadcrumb">
+    <a href="{{ url_for('menu.browse') }}" class="hover:text-white transition">Menu</a>
+    <i class="bi bi-chevron-right text-[10px]"></i>
+    {% if item.category %}
+    <a href="{{ url_for('menu.browse', category=item.category_id) }}" class="hover:text-white transition">{{ cat_name }}</a>
+    <i class="bi bi-chevron-right text-[10px]"></i>
+    {% endif %}
+    <span class="text-neutral-300 truncate">{{ item.name }}</span>
+</nav>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start" data-product>
+
+    <!-- ── Media ── -->
+    <div class="lg:sticky lg:top-24" data-reveal="left">
+        <div class="relative rounded-[32px] overflow-hidden border border-white/10 bg-[#0d0d12] shadow-[0_40px_100px_-30px_rgba(0,0,0,.95)] aspect-square sm:aspect-[5/4]">
+            <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(70% 60% at 50% 45%, rgba(255,107,53,.22), transparent 70%)"></div>
+
+            <!-- photo view -->
+            <div id="media-photo" class="absolute inset-0 {% if kind3d %}hidden{% endif %}" data-tilt data-tilt-max="6">
+                <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover" data-fly-source
+                     onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
+                <div class="bb-glare"></div>
+            </div>
+
+            {% if kind3d %}
+            <!-- 3D view -->
+            <div id="media-3d" class="absolute inset-0">
+                <div class="bb3d !min-h-0" id="item-stage" data-food3d data-food3d-mode="showcase" data-food3d-model="{{ kind3d }}" data-food3d-form="#item-form">
+                    <img class="bb3d__fallback" src="{{ asset('images/hero_' ~ kind3d ~ '.webp') }}" alt="" aria-hidden="true">
+                    <div class="bb3d__labels" aria-hidden="true"></div>
                 </div>
-                
-                <!-- Burger Customizer: Addons -->
-                {% elif item.category.name == 'Burgers' or item.category_id == 1 %}
-                <div class="bg-white/5 border border-white/5 p-5 rounded-2xl">
-                    <h4 class="text-sm font-bold text-white mb-3 uppercase tracking-wider flex items-center gap-2"><i class="bi bi-plus-circle text-brand-orange"></i> Add-ons</h4>
-                    <div class="flex flex-col gap-2.5">
-                        <label class="flex items-center justify-between p-3.5 bg-neutral-900 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 hover:border-white/10 transition-all group has-[:checked]:border-brand-orange has-[:checked]:bg-brand-orange/5">
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" name="addon" value="Extra Cheese|100" onchange="updatePrice()" class="w-4 h-4 accent-brand-orange cursor-pointer">
-                                <span class="text-sm font-semibold text-white">Extra Cheese</span>
-                            </div>
-                            <span class="text-sm font-bold text-neutral-400 group-has-[:checked]:text-brand-orange">+ Rs. 100</span>
-                        </label>
-                        
-                        <label class="flex items-center justify-between p-3.5 bg-neutral-900 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 hover:border-white/10 transition-all group has-[:checked]:border-brand-orange has-[:checked]:bg-brand-orange/5">
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" name="addon" value="Extra Patty|300" onchange="updatePrice()" class="w-4 h-4 accent-brand-orange cursor-pointer">
-                                <span class="text-sm font-semibold text-white">Extra Patty</span>
-                            </div>
-                            <span class="text-sm font-bold text-neutral-400 group-has-[:checked]:text-brand-orange">+ Rs. 300</span>
-                        </label>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <!-- Quantity & Submit Order action row -->
-                <div class="flex flex-col sm:flex-row gap-4 items-center mt-2">
-                    <!-- Quantity Selector widget -->
-                    <div class="flex items-center border border-white/10 rounded-full overflow-hidden bg-brand-charcoal px-3 py-1 shadow-inner-glass">
-                        <button type="button" onclick="const q=document.getElementById('quantity'); q.value=Math.max(1, parseInt(q.value)-1);" class="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-white transition-all focus:outline-none"><i class="bi bi-dash-lg"></i></button>
-                        <input type="number" id="quantity" name="quantity" value="1" min="1" readonly class="bg-transparent text-white w-12 text-center font-bold text-lg focus:outline-none select-none">
-                        <button type="button" onclick="const q=document.getElementById('quantity'); q.value=parseInt(q.value)+1;" class="w-10 h-10 flex items-center justify-center text-neutral-400 hover:text-white transition-all focus:outline-none"><i class="bi bi-plus-lg"></i></button>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary flex-1 py-3.5 text-base w-full shadow-orange-glow">
-                        <i class="bi bi-cart-plus-fill text-lg"></i> Add to Cart
+                <div class="absolute left-4 bottom-4 z-[3]">
+                    <button type="button" class="bb-btn bb-btn--ghost bb-btn--sm !bg-black/50 backdrop-blur" data-food3d-explode data-target="#item-stage" data-label-off="See the layers" data-label-on="Stack it back" aria-pressed="false">
+                        <i class="bi bi-layers-half"></i> <span data-label>See the layers</span>
                     </button>
                 </div>
-            </form>
-            {% else %}
-            <div class="flex flex-col gap-4 mt-2">
-                <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-primary py-3.5 text-base shadow-orange-glow w-full">
-                    <i class="bi bi-box-arrow-in-right"></i> Login to Order
-                </a>
             </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
 
-<!-- Related items section -->
-{% if related_items %}
-<div class="mt-16 select-none">
-    <div class="flex justify-between items-center mb-8 border-b border-white/5 pb-4">
-        <h2 class="text-2xl font-display font-black text-white flex items-center gap-3">
-            <i class="bi bi-fire-flame-curved text-brand-orange"></i> You Might Also Like
-        </h2>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {% for rel_item in related_items %}
-        <div class="card flex flex-col">
-            <a href="{{ url_for('menu.item_detail', item_id=rel_item.id) }}" class="block relative overflow-hidden aspect-[4/3] rounded-t-3xl">
-                <img src="{{ rel_item.image_url }}" alt="{{ rel_item.name }}" class="w-full h-full object-cover hover:scale-105 transition-all duration-500" onerror="this.src='/static/images/default_food.jpg'">
-            </a>
-            <div class="p-6 flex flex-col flex-1 gap-2">
-                <div class="flex justify-between items-start gap-2">
-                    <a href="{{ url_for('menu.item_detail', item_id=rel_item.id) }}" class="hover:text-brand-orange transition-all">
-                        <h3 class="text-sm font-bold text-white line-clamp-1 leading-snug">{{ rel_item.name }}</h3>
-                    </a>
-                    <span class="text-sm font-display font-black text-brand-orange">Rs. {{ "%.0f"|format(rel_item.price) }}</span>
+            <!-- view switcher -->
+            <div class="absolute right-4 top-4 z-[4]">
+                <div class="bb-segment" role="tablist" aria-label="Choose view">
+                    <span class="bb-segment__pill"></span>
+                    <button type="button" class="is-active" data-media-view="3d" role="tab" aria-selected="true"><i class="bi bi-badge-3d"></i> 3D build</button>
+                    <button type="button" data-media-view="photo" role="tab" aria-selected="false"><i class="bi bi-image"></i> Photo</button>
                 </div>
             </div>
+            {% endif %}
+
+            {% if item.category %}
+            <span class="bb-chip bb-chip--brand absolute left-4 top-4 z-[4]">{{ cat_name }}</span>
+            {% endif %}
         </div>
-        {% endfor %}
+        {% if kind3d %}
+        <p class="text-xs text-neutral-500 mt-3 text-center"><i class="bi bi-arrows-move"></i> Drag to rotate · the 3D build updates as you pick {{ 'a size' if kind3d == 'pizza' else 'add-ons' }}. Photo shows the real dish.</p>
+        {% endif %}
+    </div>
+
+    <!-- ── Details & order ── -->
+    <div class="flex flex-col gap-6" data-reveal="right">
+        <div>
+            <div class="flex items-center gap-3 text-sm mb-3">
+                <span class="flex items-center gap-1 text-brand-yellow font-bold"><i class="bi bi-star-fill"></i> 4.9</span>
+                <span class="w-1 h-1 rounded-full bg-neutral-600"></span>
+                <span class="text-neutral-400"><i class="bi bi-clock"></i> Made to order</span>
+                <span class="w-1 h-1 rounded-full bg-neutral-600"></span>
+                <span class="text-emerald-400 font-semibold"><i class="bi bi-check-circle-fill"></i> Available</span>
+            </div>
+            <h1 class="font-display font-black text-4xl md:text-5xl text-white tracking-tight leading-[1.02]">{{ item.name }}</h1>
+            <p class="text-neutral-400 leading-relaxed mt-4 text-[15px]">{{ item.description }}</p>
+        </div>
+
+        <div class="flex items-end gap-3">
+            <span class="bb-price text-5xl" id="main-price" data-base-price="{{ item.price }}"><small>Rs.</small><span>{{ "%.0f"|format(item.price) }}</span></span>
+            <span class="text-sm text-neutral-500 mb-2">+ Rs. {{ delivery_fee }} delivery</span>
+        </div>
+
+        {% if current_user.is_authenticated %}
+        <form id="item-form" action="{{ url_for('cart.add_to_cart', item_id=item.id) }}" method="POST" class="js-add-to-cart flex flex-col gap-6">
+            {{ ui.csrf() }}
+
+            {% if cat_name == 'Pizza' %}
+            <fieldset class="flex flex-col gap-3">
+                <legend class="bb-label mb-3"><i class="bi bi-arrows-angle-expand text-brand-orange"></i> Choose your size</legend>
+                {% for size, extra, desc in [('Small', 0, '8" · serves 1'), ('Medium', 200, '10" · serves 2'), ('Large', 400, '12" · serves 3')] %}
+                <label class="bb-option">
+                    <input type="radio" name="size" value="{{ size }}|{{ extra }}" {% if size == 'Large' %}checked{% endif %} required>
+                    <span class="bb-option__dot"></span>
+                    <span class="flex flex-col"><b class="text-white text-sm">{{ size }}</b><span class="text-xs text-neutral-500">{{ desc }}</span></span>
+                    <span class="bb-option__price">Rs. {{ "%.0f"|format(item.price + extra) }}</span>
+                </label>
+                {% endfor %}
+            </fieldset>
+            {% elif cat_name == 'Burgers' %}
+            <fieldset class="flex flex-col gap-3">
+                <legend class="bb-label mb-3"><i class="bi bi-plus-circle text-brand-orange"></i> Make it yours</legend>
+                {% for addon, extra, desc in [('Extra Cheese', 100, 'Another slice of melted cheddar'), ('Extra Patty', 300, 'Double the smashed beef')] %}
+                <label class="bb-option bb-option--check">
+                    <input type="checkbox" name="addon" value="{{ addon }}|{{ extra }}">
+                    <span class="bb-option__dot"></span>
+                    <span class="flex flex-col"><b class="text-white text-sm">{{ addon }}</b><span class="text-xs text-neutral-500">{{ desc }}</span></span>
+                    <span class="bb-option__price">+ Rs. {{ extra }}</span>
+                </label>
+                {% endfor %}
+            </fieldset>
+            {% endif %}
+
+            <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+                <div class="bb-qty self-start" aria-label="Quantity">
+                    <button type="button" data-qty-step="-1" aria-label="Decrease quantity"><i class="bi bi-dash-lg"></i></button>
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="50" inputmode="numeric" aria-label="Quantity">
+                    <button type="button" data-qty-step="1" aria-label="Increase quantity"><i class="bi bi-plus-lg"></i></button>
+                </div>
+                <button type="submit" class="bb-btn bb-btn--primary bb-btn--lg flex-1" data-magnetic>
+                    <i class="bi bi-bag-plus-fill"></i> Add to cart · <span id="cta-price">Rs. {{ "%.0f"|format(item.price) }}</span>
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <div class="bb-card p-6 flex flex-col sm:flex-row items-center gap-4">
+            <div class="flex-1 text-center sm:text-left">
+                <p class="font-bold text-white">Sign in to order</p>
+                <p class="text-sm text-neutral-400">Takes seconds — and we'll remember your address.</p>
+            </div>
+            <a href="{{ url_for('auth.login', next=request.path) }}" class="bb-btn bb-btn--primary"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-3 gap-3 pt-2">
+            <div class="bb-card p-4 text-center"><i class="bi bi-fire text-brand-orange text-xl"></i><p class="text-xs text-neutral-400 mt-1">Cooked fresh</p></div>
+            <div class="bb-card p-4 text-center"><i class="bi bi-lightning-charge-fill text-brand-yellow text-xl"></i><p class="text-xs text-neutral-400 mt-1">~30 min delivery</p></div>
+            <div class="bb-card p-4 text-center"><i class="bi bi-geo-alt-fill text-emerald-400 text-xl"></i><p class="text-xs text-neutral-400 mt-1">Live tracking</p></div>
+        </div>
     </div>
 </div>
+
+{% if related_items %}
+<section class="mt-24">
+    {{ ui.section_head('More from ' ~ cat_name, 'You might <span class="bb-gradient-text">also like</span>', url_for('menu.browse', category=item.category_id), 'See all') }}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {% for rel in related_items %}
+        {{ ui.food_card(rel, show_category=false, delay=loop.index0 * 0.07) }}
+        {% endfor %}
+    </div>
+</section>
 {% endif %}
+{% endblock %}
 
-<!-- Client-side Price custom calculation script -->
+{% block extra_js %}
 <script>
-function updatePrice() {
-    const mainPriceElem = document.getElementById('main-price');
-    if (!mainPriceElem) return;
-    
-    const basePrice = parseFloat(mainPriceElem.getAttribute('data-base-price'));
-    let additionalPrice = 0;
-    
-    const sizeRadio = document.querySelector('input[name="size"]:checked');
-    if (sizeRadio) {
-        additionalPrice += parseFloat(sizeRadio.value.split('|')[1]);
-    }
-    
-    const addons = document.querySelectorAll('input[name="addon"]:checked');
-    addons.forEach(addon => {
-        additionalPrice += parseFloat(addon.value.split('|')[1]);
-    });
-    
-    mainPriceElem.innerText = 'Rs. ' + (basePrice + additionalPrice);
-}
+(() => {
+    // Live price (display only — the server recalculates every option price itself)
+    const form = document.getElementById('item-form');
+    const priceEl = document.querySelector('#main-price span');
+    const ctaEl = document.getElementById('cta-price');
+    const base = parseFloat(document.getElementById('main-price').dataset.basePrice);
+    const update = () => {
+        if (!form) return;
+        let extra = 0;
+        form.querySelectorAll('input[name="size"]:checked, input[name="addon"]:checked')
+            .forEach((i) => { extra += parseFloat(i.value.split('|')[1]) || 0; });
+        const qty = Math.max(1, parseInt(form.querySelector('#quantity').value, 10) || 1);
+        const unit = base + extra;
+        if (priceEl) priceEl.textContent = unit.toFixed(0);
+        if (ctaEl) ctaEl.textContent = 'Rs. ' + (unit * qty).toFixed(0);
+    };
+    if (form) { form.addEventListener('change', update); form.addEventListener('input', update); update(); }
 
-document.addEventListener("DOMContentLoaded", updatePrice);
+    // Photo / 3D switcher
+    const photo = document.getElementById('media-photo');
+    const view3d = document.getElementById('media-3d');
+    document.querySelectorAll('[data-media-view]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const is3d = btn.dataset.mediaView === '3d';
+            if (photo) photo.classList.toggle('hidden', is3d);
+            if (view3d) view3d.classList.toggle('hidden', !is3d);
+            const seg = btn.closest('.bb-segment');
+            seg.querySelectorAll('button').forEach((b) => { b.classList.toggle('is-active', b === btn); b.setAttribute('aria-selected', String(b === btn)); });
+            if (window.BB && window.BB.syncSegment) window.BB.syncSegment(seg);
+        });
+    });
+})();
 </script>
+{# blocks don't share variables, so re-check the category here #}
+{% if item.category and item.category.name in ['Pizza', 'Burgers'] %}
+<script type="module" src="{{ asset('js/food3d.js') }}"></script>
+{% endif %}
 {% endblock %}

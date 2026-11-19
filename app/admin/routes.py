@@ -92,10 +92,18 @@ def edit_item(item_id):
     categories = Category.query.all()
 
     if request.method == 'POST':
-        item.name = request.form.get('name', '').strip()
+        name = request.form.get('name', '').strip()
+        price = request.form.get('price', type=float)
+        category_id = request.form.get('category_id', type=int)
+        if not name or not price or price <= 0 or not category_id:
+            flash('Name, a positive price, and category are required.', 'error')
+            return render_template('admin/item_form.html', item=item,
+                                   categories=categories, action='Edit')
+
+        item.name = name
         item.description = request.form.get('description', '').strip()
-        item.price = request.form.get('price', type=float)
-        item.category_id = request.form.get('category_id', type=int)
+        item.price = price
+        item.category_id = category_id
         item.image_url = request.form.get('image_url', '').strip() or '/static/images/default_food.jpg'
         item.is_available = request.form.get('is_available') == 'on'
 

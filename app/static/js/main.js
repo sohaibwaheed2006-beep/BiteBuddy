@@ -1,200 +1,484 @@
-// ==========================================================================
-// BiteBuddy - Global Frontend Logic & GSAP Motion Controller
-// ==========================================================================
+/* ==========================================================================
+   BiteBuddy — site-wide interactions (no dependencies)
+   ========================================================================== */
+(() => {
+    'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Mobile Menu Toggle
-    const navToggle = document.getElementById('nav-toggle');
-    const navLinks = document.getElementById('nav-links');
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-    if (navToggle) {
-        navToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            // Toggle hamburger icon animation
-            const icon = navToggle.querySelector('i');
-            if (icon) {
-                if (navLinks.classList.contains('active')) {
-                    icon.className = 'bi bi-x-lg';
-                } else {
-                    icon.className = 'bi bi-list';
-                }
-            }
-        });
+    const BB = (window.BB = window.BB || {});
+
+    /* ── Navbar: scrolled state ─────────────────────────────────────────── */
+    const nav = $('#bb-nav');
+    const onScroll = () => nav && nav.classList.toggle('is-scrolled', window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    /* ── User dropdown ──────────────────────────────────────────────────── */
+    const userBtn = $('#bb-user-btn');
+    const userMenu = $('#bb-user-menu');
+    if (userBtn && userMenu) {
+        const setOpen = (open) => {
+            userMenu.classList.toggle('is-open', open);
+            userBtn.setAttribute('aria-expanded', String(open));
+        };
+        userBtn.addEventListener('click', (e) => { e.stopPropagation(); setOpen(!userMenu.classList.contains('is-open')); });
+        document.addEventListener('click', (e) => { if (!userMenu.contains(e.target)) setOpen(false); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
     }
 
-    // 2. User Dropdown Toggle
-    const userBtn = document.getElementById('nav-user-btn');
-    const userDropdown = document.getElementById('nav-dropdown');
+    /* ── Mobile drawer ──────────────────────────────────────────────────── */
+    const drawerBtn = $('#bb-drawer-open');
+    const setDrawer = (open) => {
+        document.body.classList.toggle('drawer-open', open);
+        if (drawerBtn) drawerBtn.setAttribute('aria-expanded', String(open));
+    };
+    if (drawerBtn) drawerBtn.addEventListener('click', () => setDrawer(true));
+    $$('[data-drawer-close]').forEach((el) => el.addEventListener('click', () => setDrawer(false)));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setDrawer(false); });
 
-    if (userBtn && userDropdown) {
-        userBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            userDropdown.classList.toggle('active');
-        });
+    /* ── Toasts ─────────────────────────────────────────────────────────── */
+    const toastStack = $('#bb-toasts');
+    const dismissToast = (toast) => {
+        if (!toast || toast.classList.contains('is-leaving')) return;
+        toast.classList.add('is-leaving');
+        setTimeout(() => toast.remove(), 450);
+    };
+    const armToast = (toast, life = 6000) => {
+        toast.style.setProperty('--life', `${life}ms`);
+        const close = $('.bb-toast__close', toast);
+        if (close) close.addEventListener('click', () => dismissToast(toast));
+        let timer = setTimeout(() => dismissToast(toast), life);
+        toast.addEventListener('mouseenter', () => { clearTimeout(timer); const bar = $('.bb-toast__bar', toast); if (bar) bar.style.animationPlayState = 'paused'; });
+        toast.addEventListener('mouseleave', () => { timer = setTimeout(() => dismissToast(toast), 2000); });
+    };
+    $$('.bb-toast', toastStack || document).forEach((t) => armToast(t));
 
-        document.addEventListener('click', (e) => {
-            if (!userBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-                userDropdown.classList.remove('active');
-            }
-        });
-    }
-
-    // 3. GSAP Animations & Motion Graphics
-    if (typeof gsap !== 'undefined') {
-        // Register ScrollTrigger plugin
-        if (typeof ScrollTrigger !== 'undefined') {
-            gsap.registerPlugin(ScrollTrigger);
+    /** Show a toast. `message` is plain text (never HTML). */
+    BB.toast = (message, type = 'success', { image } = {}) => {
+        if (!toastStack) return;
+        const toast = document.createElement('div');
+        toast.className = `bb-toast bb-toast--${type}`;
+        toast.setAttribute('role', 'status');
+        let lead;
+        if (image) {
+            lead = document.createElement('img');
+            lead.className = 'bb-toast__thumb';
+            lead.src = image;
+            lead.alt = '';
+        } else {
+            lead = document.createElement('span');
+            lead.className = 'bb-toast__icon';
+            const icon = type === 'success' ? 'bi-check-circle-fill' : type === 'error' ? 'bi-exclamation-octagon-fill' : 'bi-info-circle-fill';
+            lead.innerHTML = `<i class="bi ${icon}"></i>`;
         }
+        const msg = document.createElement('div');
+        msg.className = 'bb-toast__msg';
+        msg.textContent = message;
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'bb-toast__close';
+        close.setAttribute('aria-label', 'Dismiss');
+        close.innerHTML = '<i class="bi bi-x-lg text-xs"></i>';
+        const bar = document.createElement('span');
+        bar.className = 'bb-toast__bar';
+        toast.append(lead, msg, close, bar);
+        toastStack.appendChild(toast);
+        armToast(toast, 4500);
+    };
 
-        // Hero Entrance Section
-        gsap.from('.hero-badge', { opacity: 0, y: 30, duration: 0.8, ease: 'power4.out', delay: 0.1 });
-        gsap.from('.hero-title-word', { opacity: 0, y: 60, rotateX: -45, stagger: 0.08, duration: 1.0, ease: 'back.out(1.3)', delay: 0.2 });
-        gsap.from('.hero-subtitle', { opacity: 0, y: 20, duration: 0.8, ease: 'power3.out', delay: 0.6 });
-        gsap.from('.hero-cta-btn', { opacity: 0, scale: 0.8, stagger: 0.12, duration: 0.8, ease: 'back.out(1.5)', delay: 0.8 });
-
-        // Category Cards entrance (Staggered Fade-in)
-        if (document.querySelector('.category-grid')) {
-            gsap.from('.category-card', {
-                scrollTrigger: {
-                    trigger: '.category-grid',
-                    start: 'top 85%',
-                },
-                opacity: 0,
-                y: 40,
-                stagger: 0.08,
-                duration: 0.8,
-                ease: 'power3.out'
-            });
-        }
-
-        // Deal Cards entrance (Staggered scale up)
-        if (document.querySelector('.deal-grid')) {
-            gsap.from('.deal-card', {
-                scrollTrigger: {
-                    trigger: '.deal-grid',
-                    start: 'top 85%',
-                },
-                opacity: 0,
-                scale: 0.9,
-                stagger: 0.1,
-                duration: 0.8,
-                ease: 'back.out(1.2)'
-            });
-        }
-
-        // Menu Cards Grid entrance
-        if (document.querySelector('.menu-item-grid')) {
-            gsap.from('.menu-item-card', {
-                scrollTrigger: {
-                    trigger: '.menu-item-grid',
-                    start: 'top 85%',
-                },
-                opacity: 0,
-                y: 50,
-                stagger: 0.08,
-                duration: 0.8,
-                ease: 'power3.out'
-            });
-        }
-    }
-
-    // 4. Interactive 3D Card Tilt Effect
-    const cardElements = document.querySelectorAll('.card, .category-card');
-    cardElements.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            const xc = rect.width / 2;
-            const yc = rect.height / 2;
-            
-            // Tilt range values (adjust denominator to control intensity)
-            const angleX = (yc - y) / 8;
-            const angleY = (x - xc) / 8;
-            
-            card.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg) translateY(-8px)`;
-        });
-
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = '';
-        });
-    });
-
-    // 5. Add to Cart AJAX Operations
-    const addToCartForms = document.querySelectorAll('.add-to-cart-form');
-    
-    addToCartForms.forEach(form => {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const url = form.getAttribute('action');
-            const formData = new FormData(form);
-            
-            // Add visual click animation feedback on the button
-            const submitBtn = form.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    submitBtn.style.transform = '';
-                }, 100);
-            }
-            
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
+    /* ── Scroll reveal (IntersectionObserver + CSS transitions) ─────────── */
+    const revealEls = $$('[data-reveal]');
+    if (revealEls.length) {
+        const settle = (el) => {
+            el.classList.add('is-in');
+            // once the entrance transition is over, let tilt/hover own `transform` again
+            const delay = parseFloat(getComputedStyle(el).getPropertyValue('--reveal-delay')) || 0;
+            setTimeout(() => el.classList.add('is-settled'), (delay + 1.3) * 1000);
+        };
+        if (!('IntersectionObserver' in window) || reducedMotion) {
+            revealEls.forEach(settle);
+        } else {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) { settle(entry.target); io.unobserve(entry.target); }
                 });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    const cartBadge = document.getElementById('cart-badge');
-                    if (cartBadge) {
-                        cartBadge.textContent = data.cart_count;
-                        
-                        // Pulse animation on cart badge
-                        cartBadge.style.transform = 'scale(1.6)';
-                        cartBadge.style.boxShadow = '0 0 25px rgba(255, 107, 53, 0.85)';
-                        setTimeout(() => {
-                            cartBadge.style.transform = 'scale(1)';
-                            cartBadge.style.boxShadow = '';
-                        }, 300);
-                    }
-                    
-                    // Create beautiful toast notification
-                    let flashContainer = document.querySelector('.flash-container');
-                    if (!flashContainer) {
-                        flashContainer = document.createElement('div');
-                        flashContainer.className = 'flash-container fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full px-6 md:px-0';
-                        document.body.appendChild(flashContainer);
-                    }
-                    const flashMessage = document.createElement('div');
-                    flashMessage.className = 'flash-message bg-brand-charcoal/95 border border-white/10 text-white rounded-2xl p-4 shadow-glass backdrop-blur-md flex items-start gap-3 justify-between animate-[slideIn_0.3s_ease-out_forwards]';
-                    flashMessage.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <i class="bi bi-check-circle-fill text-emerald-500 text-lg"></i>
-                            <span class="text-sm font-medium leading-relaxed">${data.message || 'Item added successfully!'}</span>
-                        </div>
-                        <button class="text-neutral-400 hover:text-white transition-all focus:outline-none" onclick="this.parentElement.remove()"><i class="bi bi-x-lg text-xs"></i></button>
-                    `;
-                    flashContainer.appendChild(flashMessage);
-                    
-                    // Auto-remove notification toast after 4 seconds
-                    setTimeout(() => {
-                        if (document.body.contains(flashMessage)) {
-                            flashMessage.remove();
-                        }
-                    }, 4000);
-                }
-            } catch (error) {
-                console.error('AJAX add-to-cart error:', error);
-                // Fallback to regular submission if fetch fails
-                form.submit();
+            }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+            revealEls.forEach((el) => io.observe(el));
+        }
+    }
+    // hero headline entrance
+    requestAnimationFrame(() => document.body.classList.add('is-loaded'));
+
+    /* ── 3D tilt cards with glare ───────────────────────────────────────── */
+    if (finePointer && !reducedMotion) {
+        $$('[data-tilt]').forEach((card) => {
+            const max = parseFloat(card.dataset.tiltMax || '10');
+            let raf = 0;
+            let rect = null;
+            const move = (e) => {
+                rect = rect || card.getBoundingClientRect();
+                const px = (e.clientX - rect.left) / rect.width;
+                const py = (e.clientY - rect.top) / rect.height;
+                cancelAnimationFrame(raf);
+                raf = requestAnimationFrame(() => {
+                    card.classList.add('is-tilting');
+                    card.style.transform = `perspective(900px) rotateX(${(0.5 - py) * max}deg) rotateY(${(px - 0.5) * max}deg) translate3d(0, -6px, 0)`;
+                    card.style.setProperty('--gx', `${px * 100}%`);
+                    card.style.setProperty('--gy', `${py * 100}%`);
+                });
+            };
+            card.addEventListener('pointerenter', () => { rect = card.getBoundingClientRect(); });
+            card.addEventListener('pointermove', move);
+            card.addEventListener('pointerleave', () => {
+                cancelAnimationFrame(raf);
+                rect = null;
+                card.classList.remove('is-tilting');
+                card.style.transform = '';
+            });
+        });
+    }
+
+    /* ── Magnetic buttons ───────────────────────────────────────────────── */
+    if (finePointer && !reducedMotion) {
+        $$('[data-magnetic]').forEach((el) => {
+            el.addEventListener('pointermove', (e) => {
+                const r = el.getBoundingClientRect();
+                const x = (e.clientX - r.left - r.width / 2) * 0.25;
+                const y = (e.clientY - r.top - r.height / 2) * 0.35;
+                el.style.transform = `translate(${x}px, ${y}px)`;
+            });
+            el.addEventListener('pointerleave', () => { el.style.transform = ''; });
+        });
+    }
+
+    /* ── Cursor spotlight ───────────────────────────────────────────────── */
+    const spot = $('.bb-spotlight');
+    if (spot && finePointer && !reducedMotion) {
+        let sraf = 0;
+        window.addEventListener('pointermove', (e) => {
+            cancelAnimationFrame(sraf);
+            sraf = requestAnimationFrame(() => {
+                spot.style.setProperty('--cx', `${e.clientX}px`);
+                spot.style.setProperty('--cy', `${e.clientY}px`);
+            });
+        }, { passive: true });
+    }
+
+    /* ── Animated counters ──────────────────────────────────────────────── */
+    const counters = $$('[data-count]');
+    if (counters.length) {
+        const run = (el) => {
+            const target = parseFloat(el.dataset.count);
+            const decimals = parseInt(el.dataset.decimals || '0', 10);
+            const suffix = el.dataset.suffix || '';
+            if (reducedMotion) { el.textContent = target.toFixed(decimals) + suffix; return; }
+            const start = performance.now();
+            const dur = 1600;
+            const tick = (now) => {
+                const p = Math.min(1, (now - start) / dur);
+                const eased = 1 - Math.pow(1 - p, 4);
+                el.textContent = (target * eased).toFixed(decimals) + suffix;
+                if (p < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        };
+        if ('IntersectionObserver' in window) {
+            const cio = new IntersectionObserver((entries) => entries.forEach((en) => {
+                if (en.isIntersecting) { run(en.target); cio.unobserve(en.target); }
+            }), { threshold: 0.5 });
+            counters.forEach((c) => cio.observe(c));
+        } else counters.forEach(run);
+    }
+
+    /* ── Cart badge helpers ─────────────────────────────────────────────── */
+    BB.setCartCount = (count) => {
+        $$('.js-cart-count').forEach((badge) => {
+            badge.textContent = count;
+            badge.classList.remove('is-bump');
+            void badge.offsetWidth; // restart animation
+            badge.classList.add('is-bump');
+        });
+    };
+
+    /* fly a product image into the cart icon */
+    const flyToCart = (img) => {
+        const target = $('.js-cart-target');
+        if (!img || !target || reducedMotion) return;
+        const from = img.getBoundingClientRect();
+        const to = target.getBoundingClientRect();
+        if (!from.width) return;
+        const clone = img.cloneNode();
+        clone.className = 'bb-fly';
+        const size = Math.min(from.width, 120);
+        Object.assign(clone.style, {
+            width: `${size}px`, height: `${size}px`,
+            left: `${from.left + from.width / 2 - size / 2}px`, top: `${from.top + from.height / 2 - size / 2}px`,
+        });
+        document.body.appendChild(clone);
+        const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+        const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+        const anim = clone.animate([
+            { transform: 'translate(0,0) scale(1) rotate(0)', opacity: 1, borderRadius: '18px' },
+            { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 140}px) scale(.7) rotate(-25deg)`, opacity: 1, offset: 0.55 },
+            { transform: `translate(${dx}px, ${dy}px) scale(.12) rotate(-60deg)`, opacity: 0.4, borderRadius: '50%' },
+        ], { duration: 900, easing: 'cubic-bezier(.5,0,.3,1)' });
+        anim.onfinish = () => clone.remove();
+    };
+
+    /* ── AJAX add to cart ───────────────────────────────────────────────── */
+    document.addEventListener('submit', async (e) => {
+        const form = e.target.closest('.js-add-to-cart');
+        if (!form) return;
+        e.preventDefault();
+        const btn = form.querySelector('[type="submit"]');
+        if (btn && btn.classList.contains('is-loading')) return;
+        if (btn) btn.classList.add('is-loading');
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' },
+                credentials: 'same-origin',
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.success) throw new Error(data.message || 'Could not add to cart');
+
+            BB.setCartCount(data.cart_count);
+            const card = form.closest('.bb-food-card, [data-product]');
+            const img = card
+                ? ($$('[data-fly-source]', card).find((el) => el.getBoundingClientRect().width > 0) || card.querySelector('img'))
+                : null;
+            flyToCart(img);
+            BB.toast(data.message || 'Added to cart', 'success', { image: data.item_image });
+            if (btn) {
+                btn.classList.remove('is-loading');
+                btn.classList.add('is-success');
+                const icon = btn.querySelector('i');
+                const prev = icon ? icon.className : '';
+                if (icon) icon.className = 'bi bi-check-lg';
+                setTimeout(() => { btn.classList.remove('is-success'); if (icon) icon.className = prev; }, 1400);
             }
+        } catch (err) {
+            if (btn) btn.classList.remove('is-loading');
+            BB.toast(err.message || 'Something went wrong — please try again.', 'error');
+        }
+    });
+
+    /* ── Quantity steppers ──────────────────────────────────────────────── */
+    document.addEventListener('click', (e) => {
+        const step = e.target.closest('[data-qty-step]');
+        if (!step) return;
+        const wrap = step.closest('.bb-qty');
+        const input = wrap && wrap.querySelector('input');
+        if (!input) return;
+        const min = parseInt(input.min || '1', 10);
+        const max = parseInt(input.max || '50', 10);
+        const next = Math.max(min, Math.min(max, (parseInt(input.value, 10) || min) + parseInt(step.dataset.qtyStep, 10)));
+        if (String(next) === input.value) return;
+        input.value = next;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    /* ── Password visibility + strength ─────────────────────────────────── */
+    $$('[data-toggle-password]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const input = document.getElementById(btn.dataset.togglePassword);
+            if (!input) return;
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.innerHTML = `<i class="bi ${show ? 'bi-eye-slash' : 'bi-eye'}"></i>`;
+            btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
         });
     });
-});
+    $$('[data-strength-for]').forEach((meter) => {
+        const input = document.getElementById(meter.dataset.strengthFor);
+        const label = document.getElementById(meter.dataset.strengthLabel);
+        if (!input) return;
+        const words = ['', 'Too weak', 'Okay', 'Good', 'Strong'];
+        input.addEventListener('input', () => {
+            const v = input.value;
+            let level = 0;
+            if (v.length) {
+                level = 1;
+                if (v.length >= 6) {
+                    level += (v.length >= 10 ? 1 : 0)
+                        + (/[A-Z]/.test(v) && /[a-z]/.test(v) ? 1 : 0)
+                        + (/\d/.test(v) || /[^A-Za-z0-9]/.test(v) ? 1 : 0);
+                    level = Math.max(2, Math.min(4, level));
+                }
+            }
+            meter.dataset.level = level;
+            if (label) label.textContent = words[level];
+        });
+    });
+    $$('[data-match-for]').forEach((input) => {
+        const other = document.getElementById(input.dataset.matchFor);
+        const hint = document.getElementById(input.dataset.matchHint);
+        if (!other) return;
+        const check = () => {
+            const ok = !input.value || input.value === other.value;
+            input.setCustomValidity(ok ? '' : 'Passwords do not match');
+            if (hint) {
+                hint.textContent = input.value ? (ok ? 'Passwords match' : 'Passwords do not match') : '';
+                hint.style.color = ok ? '#4ade80' : '#f87171';
+            }
+        };
+        input.addEventListener('input', check);
+        other.addEventListener('input', check);
+    });
+
+    /* ── Forms: loading state + no double submit ────────────────────────── */
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (!form.matches('[data-loading]') || e.defaultPrevented) return;
+        const btn = form.querySelector('[type="submit"]');
+        if (btn) {
+            if (btn.classList.contains('is-loading')) { e.preventDefault(); return; }
+            btn.classList.add('is-loading');
+        }
+    });
+
+    /* ── Confirm dialogs for destructive forms ──────────────────────────── */
+    document.addEventListener('submit', (e) => {
+        const msg = e.target.dataset && e.target.dataset.confirm;
+        if (msg && !window.confirm(msg)) e.preventDefault();
+    }, true);
+
+    /* ── Live menu filter ───────────────────────────────────────────────── */
+    const filter = $('[data-menu-filter]');
+    if (filter) {
+        const cards = $$('.js-menu-card');
+        const empty = $('#bb-filter-empty');
+        const count = $('#bb-filter-count');
+        filter.addEventListener('input', () => {
+            const q = filter.value.trim().toLowerCase();
+            let shown = 0;
+            cards.forEach((card) => {
+                const hit = !q || (card.dataset.name || '').includes(q);
+                card.style.display = hit ? '' : 'none';
+                if (hit) shown++;
+            });
+            if (empty) empty.classList.toggle('hidden', shown > 0);
+            if (count) count.textContent = shown;
+        });
+    }
+
+    /* ── Segmented control pill ─────────────────────────────────────────── */
+    BB.syncSegment = (seg) => {
+        const active = seg.querySelector('button.is-active');
+        const pill = seg.querySelector('.bb-segment__pill');
+        if (!active || !pill) return;
+        pill.style.width = `${active.offsetWidth}px`;
+        pill.style.transform = `translateX(${active.offsetLeft - 4.8}px)`;
+    };
+    $$('.bb-segment').forEach((seg) => {
+        BB.syncSegment(seg);
+        window.addEventListener('resize', () => BB.syncSegment(seg));
+        document.fonts && document.fonts.ready.then(() => BB.syncSegment(seg));
+    });
+
+    /* ── Confetti burst (order confirmation) ────────────────────────────── */
+    BB.confetti = () => {
+        if (reducedMotion) return;
+        const canvas = document.createElement('canvas');
+        canvas.className = 'bb-confetti';
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const resize = () => { canvas.width = innerWidth * dpr; canvas.height = innerHeight * dpr; };
+        resize();
+        const colors = ['#ff6b35', '#ff2d55', '#ffb800', '#4ade80', '#ffffff', '#ff9a3d'];
+        const parts = Array.from({ length: 160 }, () => ({
+            x: innerWidth / 2 + (Math.random() - 0.5) * 120,
+            y: innerHeight * 0.35,
+            vx: (Math.random() - 0.5) * 16,
+            vy: -Math.random() * 16 - 6,
+            r: Math.random() * Math.PI,
+            vr: (Math.random() - 0.5) * 0.4,
+            w: 6 + Math.random() * 8,
+            h: 8 + Math.random() * 10,
+            c: colors[(Math.random() * colors.length) | 0],
+        }));
+        const start = performance.now();
+        const frame = (now) => {
+            const t = now - start;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            parts.forEach((p) => {
+                p.vy += 0.42; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.r);
+                ctx.scale(1, Math.cos(p.r * 2));
+                ctx.fillStyle = p.c;
+                ctx.globalAlpha = Math.max(0, 1 - t / 3200);
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+            });
+            if (t < 3300) requestAnimationFrame(frame); else canvas.remove();
+        };
+        requestAnimationFrame(frame);
+    };
+    if (document.querySelector('[data-confetti]')) setTimeout(BB.confetti, 350);
+
+    /* ── 3D credit card preview (payment page) ──────────────────────────── */
+    const ccard = $('.bb-ccard');
+    if (ccard) {
+        const bind = (inputId, outId, fallback, fmt = (v) => v) => {
+            const input = document.getElementById(inputId);
+            const out = document.getElementById(outId);
+            if (!input || !out) return;
+            const upd = () => { out.textContent = input.value ? fmt(input.value) : fallback; };
+            input.addEventListener('input', upd);
+            upd();
+        };
+        const num = $('#card_number');
+        if (num) num.addEventListener('input', () => {
+            num.value = num.value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+        });
+        const exp = $('#expiry');
+        if (exp) exp.addEventListener('input', () => {
+            const d = exp.value.replace(/\D/g, '').slice(0, 4);
+            exp.value = d.length > 2 ? `${d.slice(0, 2)} / ${d.slice(2)}` : d;
+        });
+        const cvc = $('#cvc');
+        if (cvc) cvc.addEventListener('input', () => { cvc.value = cvc.value.replace(/\D/g, '').slice(0, 4); });
+        bind('card_number', 'cc-number', '•••• •••• •••• ••••', (v) => (v + ' •••• •••• •••• ••••').slice(0, 19));
+        bind('card_name', 'cc-name', 'YOUR NAME');
+        bind('expiry', 'cc-expiry', 'MM / YY');
+        bind('cvc', 'cc-cvc', '•••', (v) => v.replace(/./g, '•'));
+        if (cvc) {
+            cvc.addEventListener('focus', () => ccard.classList.add('is-flipped'));
+            cvc.addEventListener('blur', () => ccard.classList.remove('is-flipped'));
+        }
+        if (finePointer && !reducedMotion) {
+            const inner = $('.bb-ccard__inner', ccard);
+            ccard.addEventListener('pointermove', (e) => {
+                if (ccard.classList.contains('is-flipped')) return;
+                const r = ccard.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width - 0.5;
+                const y = (e.clientY - r.top) / r.height - 0.5;
+                inner.style.transform = `rotateY(${x * 18}deg) rotateX(${-y * 14}deg)`;
+            });
+            ccard.addEventListener('pointerleave', () => { inner.style.transform = ''; });
+            cvc && cvc.addEventListener('focus', () => { inner.style.transform = ''; });
+        }
+    }
+
+    /* ── Order tracking: animate progress on load ───────────────────────── */
+    const track = $('.bb-track');
+    if (track) {
+        const pct = parseFloat(track.dataset.progress || '0');
+        const fill = $('.bb-track__fill', track);
+        const rider = $('.bb-track__rider', track);
+        requestAnimationFrame(() => setTimeout(() => {
+            if (fill) fill.style.width = `${pct}%`;
+            if (rider) rider.style.left = `${pct}%`;
+        }, 250));
+    }
+})();

@@ -1,36 +1,81 @@
 {% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
 
-{% block title %}My Profile{% endblock %}
+{% block title %}My profile — BiteBuddy{% endblock %}
 
 {% block content %}
-<div class="form-container" style="max-width: 600px;">
-    <h2 style="margin-bottom: 30px;"><i class="bi bi-person-circle"></i> My Profile</h2>
-    
-    <form method="POST" action="{{ url_for('auth.profile') }}">
-        <div class="form-group">
-            <label>Email Address</label>
-            <input type="text" class="form-control" value="{{ current_user.email }}" disabled style="background: rgba(255,255,255,0.05); color: #888;">
-            <small style="color: var(--text-muted);">Email cannot be changed.</small>
+<div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
+
+    <aside class="bb-glass p-7 text-center flex flex-col items-center gap-4 lg:sticky lg:top-24" data-tilt data-tilt-max="6" data-reveal="left">
+        <div class="bb-glare"></div>
+        <div class="relative" style="transform: translateZ(50px)">
+            <div class="absolute -inset-2 rounded-full blur-xl opacity-70" style="background: var(--bb-grad)"></div>
+            <div class="relative w-28 h-28 rounded-full grid place-items-center font-display font-black text-5xl text-white border-4 border-white/10" style="background: var(--bb-grad)">
+                {{ current_user.username[:1]|upper }}
+            </div>
+        </div>
+        <div style="transform: translateZ(30px)">
+            <h1 class="font-display font-black text-2xl text-white">{{ current_user.username }}</h1>
+            <p class="text-sm text-neutral-400">{{ current_user.email }}</p>
+        </div>
+        <span class="bb-chip {% if current_user.is_admin %}bb-chip--gold{% else %}bb-chip--brand{% endif %}">
+            <i class="bi {% if current_user.is_admin %}bi-shield-lock-fill{% else %}bi-person-heart{% endif %}"></i>
+            {{ 'Admin' if current_user.is_admin else 'BiteBuddy member' }}
+        </span>
+        <div class="grid grid-cols-2 gap-3 w-full mt-2" style="transform: translateZ(20px)">
+            <div class="bb-card p-3"><p class="font-display font-black text-2xl text-white">{{ current_user.orders|length }}</p><p class="text-[11px] text-neutral-500">Orders</p></div>
+            <div class="bb-card p-3"><p class="font-display font-black text-lg text-white">{{ current_user.created_at.strftime('%b %Y') if current_user.created_at else '—' }}</p><p class="text-[11px] text-neutral-500">Member since</p></div>
+        </div>
+    </aside>
+
+    <form method="POST" action="{{ url_for('auth.profile') }}" class="bb-glass p-6 sm:p-9 flex flex-col gap-5" data-loading data-reveal="right">
+        {{ ui.csrf() }}
+        <div class="mb-2">
+            <span class="bb-eyebrow">Account settings</span>
+            <h2 class="font-display font-black text-3xl text-white mt-2">Your details</h2>
+            <p class="text-sm text-neutral-400 mt-1">We use these to get your food to the right door.</p>
         </div>
 
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" class="form-control" required value="{{ current_user.username }}">
+        <div>
+            <label class="bb-label" for="email">Email address</label>
+            <div class="bb-field">
+                <i class="bi bi-envelope bb-field__icon"></i>
+                <input type="email" id="email" class="bb-input" value="{{ current_user.email }}" disabled>
+            </div>
+            <p class="bb-hint"><i class="bi bi-lock"></i> Email can't be changed.</p>
         </div>
-        
-        <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="text" id="phone" name="phone" class="form-control" value="{{ current_user.phone or '' }}">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label class="bb-label" for="username">Username</label>
+                <div class="bb-field">
+                    <i class="bi bi-person bb-field__icon"></i>
+                    <input type="text" id="username" name="username" class="bb-input" required minlength="3" maxlength="80" value="{{ current_user.username }}">
+                </div>
+            </div>
+            <div>
+                <label class="bb-label" for="phone">Phone</label>
+                <div class="bb-field">
+                    <i class="bi bi-telephone bb-field__icon"></i>
+                    <input type="tel" id="phone" name="phone" class="bb-input" maxlength="20" value="{{ current_user.phone or '' }}" placeholder="03001234567">
+                </div>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="address">Default Delivery Address</label>
-            <textarea id="address" name="address" class="form-control" rows="4">{{ current_user.address or '' }}</textarea>
+
+        <div>
+            <label class="bb-label" for="address">Default delivery address</label>
+            <div class="bb-field bb-field--textarea">
+                <i class="bi bi-geo-alt bb-field__icon"></i>
+                <textarea id="address" name="address" class="bb-input" rows="3" placeholder="House, street, area, city">{{ current_user.address or '' }}</textarea>
+            </div>
         </div>
-        
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> Save Changes
-        </button>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+            <button type="submit" class="bb-btn bb-btn--primary"><i class="bi bi-check2-circle"></i> Save changes</button>
+            {% if not current_user.is_admin %}
+            <a href="{{ url_for('orders.history') }}" class="bb-btn bb-btn--ghost"><i class="bi bi-receipt"></i> My orders</a>
+            {% endif %}
+        </div>
     </form>
 </div>
 {% endblock %}

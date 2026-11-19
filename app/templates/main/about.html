@@ -1,30 +1,62 @@
 {% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
 
-{% block title %}About Us{% endblock %}
+{% block title %}About — BiteBuddy{% endblock %}
 
 {% block content %}
-<div class="form-container" style="max-width: 800px;">
-    <h1 style="font-size: 3rem; margin-bottom: 20px; color: var(--primary);">About BiteBuddy</h1>
-    
-    <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000" alt="Restaurant Interior" style="width: 100%; height: 300px; object-fit: cover; border-radius: var(--radius); margin-bottom: 30px;">
-    
-    <div style="font-size: 1.1rem; line-height: 1.8;">
-        <p style="margin-bottom: 20px;">
-            Founded in 2026, <strong>BiteBuddy</strong> was built on a simple premise: ordering premium quality food should be as enjoyable as eating it. We've combined cutting-edge technology with culinary excellence to bring you a seamless online ordering experience.
-        </p>
-        
-        <h3 style="margin: 30px 0 15px; color: var(--accent);">Our Mission</h3>
-        <p style="margin-bottom: 20px;">
-            To deliver happiness to your doorstep through mouth-watering meals, prepared with the freshest ingredients and delivered with lightning speed.
-        </p>
-
-        <h3 style="margin: 30px 0 15px; color: var(--accent);">Why Choose Us?</h3>
-        <ul style="list-style-type: none; padding-left: 0;">
-            <li style="margin-bottom: 10px;"><i class="bi bi-check-lg-circle" style="color: var(--primary); margin-right: 10px;"></i> <strong>Premium Quality:</strong> We never compromise on ingredients.</li>
-            <li style="margin-bottom: 10px;"><i class="bi bi-check-lg-circle" style="color: var(--primary); margin-right: 10px;"></i> <strong>Lightning Fast:</strong> Our delivery network ensures your food arrives hot.</li>
-            <li style="margin-bottom: 10px;"><i class="bi bi-check-lg-circle" style="color: var(--primary); margin-right: 10px;"></i> <strong>Secure Payments:</strong> Multiple safe payment options available.</li>
-            <li style="margin-bottom: 10px;"><i class="bi bi-check-lg-circle" style="color: var(--primary); margin-right: 10px;"></i> <strong>Live Tracking:</strong> Know exactly where your order is.</li>
-        </ul>
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-24">
+    <div data-reveal="left">
+        <span class="bb-eyebrow">Our story</span>
+        <h1 class="font-display font-black text-5xl md:text-6xl text-white tracking-tight leading-[.98] mt-4">Food that's worth<br><span class="bb-gradient-text">the wait</span> — minus the wait.</h1>
+        <p class="text-neutral-400 text-lg leading-relaxed mt-6">BiteBuddy started in Islamabad in 2026 with a simple idea: ordering great food should feel as good as eating it. So we built a kitchen that cooks every order fresh, and an app that shows you exactly where it is.</p>
+        <div class="flex flex-wrap gap-3 mt-8">
+            <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg"><i class="bi bi-grid-fill"></i> See the menu</a>
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--ghost bb-btn--lg">Join BiteBuddy</a>
+            {% endif %}
+        </div>
     </div>
-</div>
+
+    <div class="relative h-[420px] md:h-[480px]" data-reveal="right" style="perspective: 1200px">
+        <img src="{{ url_for('static', filename='images/cat_burgers.jpg') }}" alt="A BiteBuddy burger" loading="lazy"
+             class="absolute left-0 top-6 w-[62%] aspect-[4/5] object-cover rounded-[28px] border border-white/10 shadow-2xl"
+             style="transform: rotateY(14deg) rotateZ(-4deg)">
+        <img src="{{ url_for('static', filename='images/cat_pizza.jpg') }}" alt="A BiteBuddy pizza" loading="lazy"
+             class="absolute right-0 top-0 w-[52%] aspect-square object-cover rounded-[28px] border border-white/10 shadow-2xl"
+             style="transform: rotateY(-16deg) rotateZ(5deg) translateZ(40px)">
+        <img src="{{ url_for('static', filename='images/item_mango.jpg') }}" alt="A BiteBuddy mango shake" loading="lazy"
+             class="absolute right-[10%] bottom-0 w-[44%] aspect-[4/3] object-cover rounded-[28px] border border-white/10 shadow-2xl"
+             style="transform: rotateX(10deg) rotateZ(-3deg) translateZ(80px)">
+        <span class="bb-chip bb-chip--gold absolute left-[8%] bottom-[8%]" style="transform: translateZ(120px)"><i class="bi bi-star-fill"></i> 4.9 from our regulars</span>
+    </div>
+</section>
+
+<section class="bb-section">
+    {{ ui.section_head('What we stand for', 'Four promises, <span class="bb-gradient-text">every order</span>') }}
+    {% set values = [
+        ('bi-gem', 'Premium ingredients', 'Fresh produce, real cheddar and quality cuts — we never cut corners on what goes in.'),
+        ('bi-lightning-charge-fill', 'Lightning fast', 'Cooked to order and out the door quickly, so it reaches you hot.'),
+        ('bi-shield-lock-fill', 'Safe payments', 'Pay cash on delivery or by card — whatever suits you.'),
+        ('bi-geo-alt-fill', 'Live tracking', 'Watch your order go from kitchen to doorstep, step by step.'),
+    ] %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {% for icon, title, text in values %}
+        <div class="bb-card p-7" data-tilt data-reveal style="--reveal-delay: {{ loop.index0 * 0.08 }}s">
+            <div class="bb-glare"></div>
+            <div class="w-14 h-14 rounded-2xl grid place-items-center text-2xl text-white mb-5 shadow-orange-glow" style="background: var(--bb-grad); transform: translateZ(40px)"><i class="bi {{ icon }}"></i></div>
+            <h3 class="font-display font-black text-lg text-white mb-2" style="transform: translateZ(25px)">{{ title }}</h3>
+            <p class="text-sm text-neutral-400 leading-relaxed" style="transform: translateZ(15px)">{{ text }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="bb-section !mb-8">
+    <div class="bb-glass p-8 md:p-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center" data-reveal="zoom">
+        <div><p class="font-display font-black text-4xl md:text-5xl text-white"><span data-count="30">30</span><span class="text-brand-orange">m</span></p><p class="text-sm text-neutral-400 mt-1">Avg. delivery</p></div>
+        <div><p class="font-display font-black text-4xl md:text-5xl text-white"><span data-count="7">7</span></p><p class="text-sm text-neutral-400 mt-1">Food categories</p></div>
+        <div><p class="font-display font-black text-4xl md:text-5xl text-white"><span data-count="4.9" data-decimals="1">4.9</span><i class="bi bi-star-fill text-brand-yellow text-2xl"></i></p><p class="text-sm text-neutral-400 mt-1">Average rating</p></div>
+        <div><p class="font-display font-black text-4xl md:text-5xl text-white">2<span class="text-brand-orange">am</span></p><p class="text-sm text-neutral-400 mt-1">Open daily until</p></div>
+    </div>
+</section>
 {% endblock %}

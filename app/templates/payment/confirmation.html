@@ -1,75 +1,41 @@
 {% extends "base.html" %}
-{% block title %}Order Confirmed - BiteBuddy{% endblock %}
+{% block title %}Order confirmed — BiteBuddy{% endblock %}
 
 {% block content %}
-<div class="min-h-[70vh] flex items-center justify-center py-8">
-    <div class="form-container max-w-lg w-full text-center flex flex-col items-center gap-8">
-
-        <!-- Success Animation -->
-        <div class="relative">
-            <div class="w-24 h-24 bg-emerald-500/10 border-2 border-emerald-500/30 rounded-full flex items-center justify-center text-emerald-400 text-5xl shadow-[0_0_40px_rgba(16,185,129,0.2)] animate-[pulse_2s_ease-in-out_infinite]">
-                <i class="bi bi-check-lg"></i>
-            </div>
-            <div class="absolute -top-1 -right-1 w-8 h-8 bg-brand-orange border-2 border-brand-charcoal rounded-full flex items-center justify-center text-white text-sm">
-                <i class="bi bi-bag-heart-fill"></i>
-            </div>
+<div class="max-w-xl mx-auto py-6" data-confetti>
+    <div class="bb-glass p-8 sm:p-12 text-center flex flex-col items-center gap-7" data-reveal="zoom">
+        <div class="bb-success-orb" aria-hidden="true">
+            <span class="bb-success-orb__ring"></span>
+            <span class="bb-success-orb__ring"></span>
+            <span class="bb-success-orb__core"><i class="bi bi-check-lg"></i></span>
         </div>
 
-        {% if order.payment_method == 'cash' %}
         <div>
-            <h1 class="text-3xl font-display font-black text-white mb-3">Order Confirmed! 🎉</h1>
-            <p class="text-neutral-400">Your order <strong class="text-white">#{{ order.id }}</strong> will be paid via <strong class="text-brand-orange">Cash on Delivery</strong>.</p>
+            <h1 class="font-display font-black text-4xl text-white tracking-tight">
+                {% if order.payment_method == 'cash' %}Order confirmed!{% else %}Payment successful!{% endif %}
+            </h1>
+            <p class="text-neutral-400 mt-3">
+                Order <b class="text-white">#{{ order.id }}</b> is in the kitchen.
+                {% if order.payment_method == 'cash' %}Pay <b class="text-brand-orange">Rs. {{ "%.0f"|format(order.total_amount) }}</b> in cash when it arrives.{% else %}Your card payment has been processed.{% endif %}
+            </p>
         </div>
 
-        <div class="w-full bg-white/5 border border-white/5 rounded-2xl p-5 flex flex-col gap-3 text-sm text-left">
-            <div class="flex justify-between">
-                <span class="text-neutral-400">Amount on Delivery</span>
-                <span class="font-display font-black text-brand-orange">Rs. {{ "%.0f"|format(order.total_amount) }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-neutral-400">Payment Method</span>
-                <span class="text-white font-semibold">Cash on Delivery</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-neutral-400">Order ID</span>
-                <span class="text-white font-semibold">#{{ order.id }}</span>
-            </div>
+        <div class="w-full bb-card p-5 flex flex-col gap-3 text-sm text-left">
+            {% if order.payment %}
+            <div class="flex justify-between"><span class="text-neutral-400">Transaction</span><span class="font-mono text-brand-orange text-xs">{{ order.payment.transaction_id }}</span></div>
+            {% endif %}
+            <div class="flex justify-between"><span class="text-neutral-400">Amount</span><span class="text-white font-bold">Rs. {{ "%.0f"|format(order.total_amount) }}</span></div>
+            <div class="flex justify-between"><span class="text-neutral-400">Payment</span><span class="text-white font-semibold">{{ 'Cash on delivery' if order.payment_method == 'cash' else 'Card' }}</span></div>
+            <div class="flex justify-between"><span class="text-neutral-400">Deliver to</span><span class="text-white font-semibold text-right max-w-[60%] line-clamp-2">{{ order.delivery_address }}</span></div>
         </div>
 
-        {% elif order.payment %}
-        <div>
-            <h1 class="text-3xl font-display font-black text-white mb-3">Payment Successful! 🎉</h1>
-            <p class="text-neutral-400">Your order <strong class="text-white">#{{ order.id }}</strong> has been confirmed and payment processed.</p>
-        </div>
-
-        <div class="w-full bg-white/5 border border-white/5 rounded-2xl p-5 flex flex-col gap-3 text-sm text-left">
-            <div class="flex justify-between">
-                <span class="text-neutral-400">Transaction ID</span>
-                <span class="font-mono text-brand-orange text-xs">{{ order.payment.transaction_id }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-neutral-400">Amount Paid</span>
-                <span class="font-display font-black text-white">Rs. {{ "%.0f"|format(order.payment.amount) }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-neutral-400">Payment Method</span>
-                <span class="text-white font-semibold capitalize">{{ order.payment.method }}</span>
-            </div>
-        </div>
-        {% endif %}
-
-        <p class="text-sm text-neutral-300 bg-brand-orange/5 border border-brand-orange/10 rounded-xl px-5 py-3 flex items-center gap-2">
-            <i class="bi bi-fire text-brand-orange animate-pulse"></i>
-            The restaurant has started preparing your order!
+        <p class="w-full text-sm text-neutral-300 rounded-2xl px-5 py-4 flex items-center gap-3 bg-brand-orange/5 border border-brand-orange/15">
+            <span class="text-2xl">👨‍🍳</span> The chef is firing up the grill — follow every step live.
         </p>
 
-        <div class="flex gap-4 w-full">
-            <a href="{{ url_for('orders.track', order_id=order.id) }}" class="btn btn-primary flex-1 shadow-orange-glow">
-                <i class="bi bi-geo-alt-fill"></i> Track Order
-            </a>
-            <a href="{{ url_for('menu.browse') }}" class="btn btn-outline flex-1">
-                <i class="bi bi-basket2-fill"></i> Order More
-            </a>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+            <a href="{{ url_for('orders.track', order_id=order.id) }}" class="bb-btn bb-btn--primary bb-btn--lg"><i class="bi bi-geo-alt-fill"></i> Track order</a>
+            <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--ghost bb-btn--lg"><i class="bi bi-plus-lg"></i> Order more</a>
         </div>
     </div>
 </div>

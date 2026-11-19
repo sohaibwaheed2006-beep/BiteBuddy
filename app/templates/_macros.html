@@ -1,0 +1,88 @@
+{# Reusable BiteBuddy UI pieces. Import with: {% import "_macros.html" as ui with context %} #}
+
+{% macro logo_mark(size=24) -%}
+<svg width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M3.6 10.6C3.6 6.8 7.4 4 12 4s8.4 2.8 8.4 6.6c0 .5-.4.9-.9.9h-15a.9.9 0 0 1-.9-.9z" fill="#fff"/>
+    <ellipse cx="9" cy="7.4" rx=".8" ry=".45" transform="rotate(-20 9 7.4)" fill="#ff6b35"/>
+    <ellipse cx="12.6" cy="6.5" rx=".8" ry=".45" transform="rotate(10 12.6 6.5)" fill="#ff6b35"/>
+    <ellipse cx="15.6" cy="8.2" rx=".8" ry=".45" transform="rotate(25 15.6 8.2)" fill="#ff6b35"/>
+    <path d="M3.2 13.2c1.2-.9 2.4.9 3.6 0s2.4.9 3.6 0 2.4.9 3.6 0 2.4.9 3.6 0 2.4.9 3.6 0" stroke="#fff" stroke-opacity=".75" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M4 16h16v.6a3.4 3.4 0 0 1-3.4 3.4H7.4A3.4 3.4 0 0 1 4 16.6V16z" fill="#fff"/>
+</svg>
+{%- endmacro %}
+
+{% macro logo(href=None) -%}
+<a href="{{ href or url_for('main.home') }}" class="bb-logo" aria-label="BiteBuddy home">
+    <span class="bb-logo__mark">{{ logo_mark() }}</span>
+    <span class="bb-logo__word">Bite<span>Buddy</span></span>
+</a>
+{%- endmacro %}
+
+{% macro section_head(eyebrow, title, link_url=None, link_text=None, eyebrow_icon=None) -%}
+<div class="bb-section-head" data-reveal>
+    <div>
+        <span class="bb-eyebrow">{% if eyebrow_icon %}<i class="bi {{ eyebrow_icon }}"></i>{% endif %}{{ eyebrow }}</span>
+        <h2 class="bb-section-title">{{ title|safe }}</h2>
+    </div>
+    {% if link_url %}
+    <a href="{{ link_url }}" class="bb-link-arrow">{{ link_text }} <i class="bi bi-arrow-right"></i></a>
+    {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro status_badge(order) -%}
+<span class="bb-status bb-status--{{ order.status }}">{{ order.status_display }}</span>
+{%- endmacro %}
+
+{% macro food_card(item, show_category=true, delay=0) -%}
+<article class="bb-food-card js-menu-card" data-tilt data-reveal style="--reveal-delay: {{ delay }}s"
+         data-name="{{ (item.name ~ ' ' ~ (item.description or '') ~ ' ' ~ (item.category.name if item.category else ''))|lower }}">
+    <div class="bb-glare"></div>
+    <a href="{{ url_for('menu.item_detail', item_id=item.id) }}" class="bb-food-card__media" aria-label="View {{ item.name }}">
+        <img src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy" decoding="async"
+             onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
+    </a>
+    {% if show_category and item.category %}
+    <span class="bb-food-card__chip-tl bb-chip bb-chip--brand">{{ item.category.name }}</span>
+    {% endif %}
+    <span class="bb-food-card__chip-tr bb-chip bb-chip--gold"><i class="bi bi-star-fill"></i> 4.9</span>
+    <div class="bb-food-card__body">
+        <a href="{{ url_for('menu.item_detail', item_id=item.id) }}" class="bb-food-card__title">{{ item.name }}</a>
+        <p class="bb-food-card__desc">{{ item.description }}</p>
+        <div class="bb-food-card__foot">
+            <div class="bb-price text-xl"><small>Rs.</small>{{ "%.0f"|format(item.price) }}</div>
+            {% if current_user.is_authenticated %}
+            <form action="{{ url_for('cart.add_to_cart', item_id=item.id) }}" method="POST" class="js-add-to-cart">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" class="bb-add-btn" aria-label="Add {{ item.name }} to cart" title="Add to cart">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+            </form>
+            {% else %}
+            <a href="{{ url_for('auth.login', next=request.path) }}" class="bb-add-btn" aria-label="Sign in to order {{ item.name }}" title="Sign in to order">
+                <i class="bi bi-bag-plus"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</article>
+{%- endmacro %}
+
+{% macro category_card(cat, delay=0) -%}
+<a href="{{ url_for('menu.browse', category=cat.id) }}" class="bb-cat-card" data-tilt data-reveal style="--reveal-delay: {{ delay }}s">
+    <div class="bb-glare"></div>
+    <div class="bb-cat-card__orb">
+        <img src="{{ cat.image_url }}" alt="{{ cat.name }}" loading="lazy" decoding="async"
+             onerror="this.onerror=null;this.src='/static/images/default_cat.jpg'">
+    </div>
+    <div>
+        <h3 class="bb-cat-card__name">{{ cat.name }}</h3>
+        <p class="bb-cat-card__count">{{ cat.items|selectattr('is_available')|list|length }} items</p>
+    </div>
+</a>
+{%- endmacro %}
+
+{% macro csrf() -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{%- endmacro %}

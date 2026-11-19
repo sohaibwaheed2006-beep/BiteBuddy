@@ -1,120 +1,80 @@
 {% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
 
-{% block title %}Menu - BiteBuddy{% endblock %}
+{% block title %}{% if search_query %}“{{ search_query }}” — {% elif active_category %}{{ active_category.name }} — {% endif %}Menu · BiteBuddy{% endblock %}
 
 {% block content %}
-<div class="flex flex-col md:flex-row gap-8 items-start select-none">
-    
-    <!-- Sidebar / Category Filters -->
-    <aside class="w-full md:w-64 flex-shrink-0 sidebar sticky top-24">
-        <h3 class="text-lg font-display font-black text-white mb-5 pb-3 border-b border-white/5 flex items-center gap-2">
-            <i class="bi bi-funnel-fill text-brand-orange"></i> Categories
-        </h3>
-        <div class="flex flex-col gap-2">
-            <a href="{{ url_for('menu.browse') }}" class="cat-link {% if not active_category and not search_query %}active{% endif %}">
-                <i class="bi bi-grid-fill"></i> All Items
-            </a>
-            {% for cat in categories %}
-            <a href="{{ url_for('menu.browse', category=cat.id) }}" class="cat-link {% if active_category and active_category.id == cat.id %}active{% endif %}">
-                {% if cat.name == 'Burgers' %}
-                <i class="bi bi-egg-fried"></i>
-                {% elif cat.name == 'Fried Chicken' %}
-                <i class="bi bi-trophy-fill"></i>
-                {% elif cat.name == 'Pizza' %}
-                <i class="bi bi-pie-chart-fill"></i>
-                {% elif cat.name == 'Wraps & Rolls' %}
-                <i class="bi bi-border-inner"></i>
-                {% elif cat.name == 'Sides' %}
-                <i class="bi bi-clipboard-data-fill"></i>
-                {% elif cat.name == 'Beverages' %}
-                <i class="bi bi-cup-straw"></i>
-                {% else %}
-                <i class="bi bi-cake2-fill"></i>
-                {% endif %}
-                {{ cat.name }}
-            </a>
-            {% endfor %}
-        </div>
-    </aside>
-
-    <!-- Menu Grid Area -->
-    <div class="flex-1 w-full">
-        <!-- Catalog Header -->
-        <div class="border-b border-white/5 pb-5 mb-8">
+{% set cat_icons = {
+    'Burgers': '🍔', 'Fried Chicken': '🍗', 'Pizza': '🍕', 'Wraps & Rolls': '🌯',
+    'Sides': '🍟', 'Beverages': '🥤', 'Desserts': '🍰'
+} %}
+<!-- Header -->
+<section class="relative mb-8 md:mb-10" data-reveal>
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div>
+            <span class="bb-eyebrow">{% if search_query %}Search{% elif active_category %}Category{% else %}The menu{% endif %}</span>
             {% if search_query %}
-                <h1 class="text-3xl font-display font-black text-white">Search Results for "<span class="text-brand-orange">{{ search_query }}</span>"</h1>
+            <h1 class="bb-section-title">Results for “<span class="bb-gradient-text">{{ search_query }}</span>”</h1>
+            <p class="text-neutral-400 mt-3">{{ items|length }} dish{{ 'es' if items|length != 1 }} found.</p>
             {% elif active_category %}
-                <h1 class="text-3xl font-display font-black text-white">{{ active_category.name }}</h1>
-                {% if active_category.description %}
-                    <p class="text-sm text-neutral-400 mt-2 max-w-xl leading-relaxed">{{ active_category.description }}</p>
-                {% endif %}
+            <h1 class="bb-section-title">{{ cat_icons.get(active_category.name, '🍽️') }} {{ active_category.name }}</h1>
+            {% if active_category.description %}<p class="text-neutral-400 mt-3 max-w-xl">{{ active_category.description }}</p>{% endif %}
             {% else %}
-                <h1 class="text-3xl font-display font-black text-white">Full Menu</h1>
-                <p class="text-sm text-neutral-400 mt-2">Explore our premium selection of handcrafted delights.</p>
+            <h1 class="bb-section-title">Everything we <span class="bb-gradient-text">cook</span></h1>
+            <p class="text-neutral-400 mt-3 max-w-xl">Hand-crafted to order. Tap any dish for details, sizes and add-ons — burgers and pizzas even come in 3D.</p>
             {% endif %}
         </div>
-
-        <!-- Catalog Grid -->
-        <div class="menu-item-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for item in items %}
-            <div class="menu-item-card card flex flex-col group border border-white/10 hover:border-brand-orange/40 transition-all duration-500" style="background: #121215 !important;">
-                <a href="{{ url_for('menu.item_detail', item_id=item.id) }}" class="block relative overflow-hidden aspect-[4/3] rounded-t-3xl">
-                    <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src='/static/images/default_food.jpg'">
-                    
-                    <!-- Rating badge -->
-                    <div class="absolute top-3 right-3 bg-brand-dark/90 backdrop-blur px-3 py-1 rounded-full text-xs font-black text-brand-gold flex items-center gap-1 border border-white/10">
-                        <i class="bi bi-star-fill text-yellow-400"></i> 4.9
-                    </div>
-                    
-                    {% if item.category %}
-                    <div class="absolute bottom-3 left-3 bg-brand-orange/90 backdrop-blur text-white px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
-                        {{ item.category.name }}
-                    </div>
-                    {% endif %}
-                </a>
-                
-                <div class="p-6 flex flex-col flex-1 gap-3" style="background: #121215 !important;">
-                    <div class="flex justify-between items-start gap-2">
-                        <a href="{{ url_for('menu.item_detail', item_id=item.id) }}" class="hover:text-brand-orange transition-colors block">
-                            <h3 class="text-base font-bold text-white group-hover:text-brand-orange transition-colors line-clamp-1 leading-snug block">{{ item.name }}</h3>
-                        </a>
-                        <span class="text-base font-display font-black text-brand-orange flex-shrink-0">Rs. {{ "%.0f"|format(item.price) }}</span>
-                    </div>
-                    
-                    <p class="text-xs text-neutral-300 font-medium line-clamp-2 leading-relaxed flex-1">
-                        {{ item.description }}
-                    </p>
-                    
-                    <div class="mt-2 pt-3 border-t border-white/10">
-                        {% if current_user.is_authenticated %}
-                        <form action="{{ url_for('cart.add_to_cart', item_id=item.id) }}" method="POST" class="add-to-cart-form w-full">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="btn btn-primary w-full shadow-orange-glow py-3 text-xs font-bold">
-                                <i class="bi bi-cart-plus-fill"></i> Add to Cart
-                            </button>
-                        </form>
-                        {% else %}
-                        <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-outline w-full py-3 text-xs font-bold">
-                            <i class="bi bi-box-arrow-in-right"></i> Login to Order
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <!-- No items found state -->
-            <div class="col-span-full py-16 px-6 text-center card flex flex-col items-center justify-center gap-5">
-                <div class="w-20 h-20 bg-neutral-900 border border-white/5 rounded-full flex items-center justify-center text-neutral-400 text-3xl">
-                    <i class="bi bi-search"></i>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold text-white mb-2">No items found</h2>
-                    <p class="text-sm text-neutral-500">We couldn't find anything matching your selection.</p>
-                </div>
-                <a href="{{ url_for('menu.browse') }}" class="btn btn-primary mt-2"><i class="bi bi-grid-fill"></i> View All Items</a>
-            </div>
-            {% endfor %}
+        {% if items %}
+        <div class="w-full lg:w-80">
+            <label class="bb-search !py-3" for="menu-filter">
+                <i class="bi bi-funnel"></i>
+                <input type="search" id="menu-filter" data-menu-filter placeholder="Filter these dishes…" autocomplete="off">
+                <span class="text-xs font-bold text-neutral-500 whitespace-nowrap"><span id="bb-filter-count">{{ items|length }}</span> shown</span>
+            </label>
         </div>
+        {% endif %}
     </div>
+</section>
+
+<!-- Category chips -->
+<nav class="sticky top-[64px] z-30 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 mb-8 bg-gradient-to-b from-[#07070a] via-[#07070a]/90 to-transparent" aria-label="Categories">
+    <div class="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <a href="{{ url_for('menu.browse') }}"
+           class="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border transition-all
+                  {% if not active_category and not search_query %}text-white border-transparent shadow-orange-glow{% else %}text-neutral-300 border-white/10 bg-white/[.03] hover:border-white/25 hover:text-white{% endif %}"
+           {% if not active_category and not search_query %}style="background: var(--bb-grad)" aria-current="page"{% endif %}>
+            🍽️ All
+        </a>
+        {% for cat in categories %}
+        {% set is_active = active_category and active_category.id == cat.id %}
+        <a href="{{ url_for('menu.browse', category=cat.id) }}"
+           class="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border transition-all
+                  {% if is_active %}text-white border-transparent shadow-orange-glow{% else %}text-neutral-300 border-white/10 bg-white/[.03] hover:border-white/25 hover:text-white{% endif %}"
+           {% if is_active %}style="background: var(--bb-grad)" aria-current="page"{% endif %}>
+            {{ cat_icons.get(cat.name, '🍽️') }} {{ cat.name }}
+        </a>
+        {% endfor %}
+    </div>
+</nav>
+
+<!-- Grid -->
+{% if items %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    {% for item in items %}
+    {{ ui.food_card(item, show_category=not active_category, delay=(loop.index0 % 4) * 0.06) }}
+    {% endfor %}
 </div>
+<div id="bb-filter-empty" class="hidden bb-card py-16 px-6 text-center">
+    <div class="text-5xl mb-4">🔍</div>
+    <h2 class="font-display font-black text-2xl text-white">Nothing matches that filter</h2>
+    <p class="text-neutral-400 mt-2">Try another word — or clear the filter to see everything.</p>
+</div>
+{% else %}
+<div class="bb-card py-20 px-6 text-center max-w-xl mx-auto" data-reveal>
+    <div class="text-6xl mb-5">🍽️</div>
+    <h2 class="font-display font-black text-2xl text-white">{% if search_query %}No dishes match “{{ search_query }}”{% else %}Nothing here yet{% endif %}</h2>
+    <p class="text-neutral-400 mt-2 mb-8">Try a different search or browse the full menu.</p>
+    <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary"><i class="bi bi-grid-fill"></i> View full menu</a>
+</div>
+{% endif %}
 {% endblock %}

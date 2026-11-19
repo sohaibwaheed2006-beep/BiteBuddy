@@ -1,96 +1,49 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Admin Dashboard - BiteBuddy{% endblock %}
+{% import "_macros.html" as ui with context %}
+{% block title %}Dashboard — BiteBuddy Admin{% endblock %}
 
 {% block admin_content %}
-<div class="mb-6">
-    <h1 class="text-2xl font-display font-black text-white flex items-center gap-3">
-        <i class="bi bi-speedometer2 text-brand-orange"></i> Dashboard Overview
-    </h1>
+<div class="mb-8" data-reveal>
+    <span class="bb-eyebrow">Overview</span>
+    <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-2">Good to see you, {{ current_user.username }}</h1>
 </div>
 
-<!-- Stats Grid -->
-<div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
-    <!-- Revenue -->
-    <div class="card p-5 flex items-center gap-4 border-l-2 border-emerald-500">
-        <div class="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 text-xl flex-shrink-0">
-            <i class="bi bi-wallet2"></i>
-        </div>
-        <div>
-            <p class="text-xl font-display font-black text-white leading-none">Rs. {{ "%.0f"|format(total_revenue) }}</p>
-            <p class="text-xs text-neutral-400 mt-1">Total Revenue</p>
-        </div>
+{% set stats = [
+    ('bi-wallet2', 'Revenue', total_revenue, 'Rs. ', '#4ade80', 'rgba(74,222,128,.12)'),
+    ('bi-box-seam', 'Total orders', total_orders, '', '#60a5fa', 'rgba(96,165,250,.12)'),
+    ('bi-hourglass-split', 'Pending', pending_orders, '', '#facc15', 'rgba(250,204,21,.12)'),
+    ('bi-people-fill', 'Customers', total_users, '', '#c084fc', 'rgba(192,132,252,.12)'),
+] %}
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+    {% for icon, label, value, prefix, color, bg in stats %}
+    <div class="bb-card bb-stat" data-tilt data-tilt-max="8" data-reveal style="--reveal-delay: {{ loop.index0 * 0.06 }}s">
+        <div class="bb-glare"></div>
+        <div class="bb-stat__icon mb-4" style="color: {{ color }}; background: {{ bg }}; transform: translateZ(30px)"><i class="bi {{ icon }}"></i></div>
+        <p class="bb-stat__value" style="transform: translateZ(20px)">{{ prefix }}<span data-count="{{ '%.0f'|format(value) }}">{{ '%.0f'|format(value) }}</span></p>
+        <p class="text-xs text-neutral-400 mt-1.5">{{ label }}</p>
     </div>
-    <!-- Total Orders -->
-    <div class="card p-5 flex items-center gap-4 border-l-2 border-blue-500">
-        <div class="w-12 h-12 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 text-xl flex-shrink-0">
-            <i class="bi bi-box-seam"></i>
-        </div>
-        <div>
-            <p class="text-xl font-display font-black text-white leading-none">{{ total_orders }}</p>
-            <p class="text-xs text-neutral-400 mt-1">Total Orders</p>
-        </div>
-    </div>
-    <!-- Pending -->
-    <div class="card p-5 flex items-center gap-4 border-l-2 border-yellow-500">
-        <div class="w-12 h-12 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-center justify-center text-yellow-400 text-xl flex-shrink-0">
-            <i class="bi bi-hourglass-split"></i>
-        </div>
-        <div>
-            <p class="text-xl font-display font-black text-white leading-none">{{ pending_orders }}</p>
-            <p class="text-xs text-neutral-400 mt-1">Pending Orders</p>
-        </div>
-    </div>
-    <!-- Users -->
-    <div class="card p-5 flex items-center gap-4 border-l-2 border-purple-500">
-        <div class="w-12 h-12 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-400 text-xl flex-shrink-0">
-            <i class="bi bi-people-fill"></i>
-        </div>
-        <div>
-            <p class="text-xl font-display font-black text-white leading-none">{{ total_users }}</p>
-            <p class="text-xs text-neutral-400 mt-1">Registered Users</p>
-        </div>
-    </div>
+    {% endfor %}
 </div>
 
-<!-- Recent Orders Table -->
-<div class="card p-6">
-    <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
-        <h3 class="font-display font-black text-white text-base flex items-center gap-2">
-            <i class="bi bi-clock-history text-brand-orange"></i> Recent Orders
-        </h3>
-        <a href="{{ url_for('admin.manage_orders') }}" class="btn btn-outline btn-sm text-xs px-4 py-2">View All</a>
+<div class="bb-card overflow-hidden" data-reveal>
+    <div class="flex items-center justify-between p-5 border-b border-white/5">
+        <h2 class="font-display font-black text-lg text-white flex items-center gap-2"><i class="bi bi-clock-history text-brand-orange"></i> Recent orders</h2>
+        <a href="{{ url_for('admin.manage_orders') }}" class="bb-btn bb-btn--ghost bb-btn--sm">View all</a>
     </div>
-
     <div class="overflow-x-auto">
-        <table class="w-full text-sm min-w-[550px]">
-            <thead>
-                <tr class="text-left text-xs text-neutral-500 uppercase tracking-wider">
-                    <th class="pb-3 pr-4">Order</th>
-                    <th class="pb-3 pr-4">Customer</th>
-                    <th class="pb-3 pr-4">Amount</th>
-                    <th class="pb-3 pr-4">Status</th>
-                    <th class="pb-3">Date</th>
-                </tr>
-            </thead>
+        <table class="bb-table min-w-[600px]">
+            <thead><tr><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th><th>Placed</th></tr></thead>
             <tbody>
                 {% for order in recent_orders %}
-                <tr class="border-t border-white/5 hover:bg-white/2 transition-all">
-                    <td class="py-3 pr-4 font-bold text-white">#{{ order.id }}</td>
-                    <td class="py-3 pr-4 text-neutral-300">{{ order.user.username }}</td>
-                    <td class="py-3 pr-4 font-display font-bold text-brand-orange">Rs. {{ "%.0f"|format(order.total_amount) }}</td>
-                    <td class="py-3 pr-4">
-                        <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full
-                            {% if order.status == 'delivered' %}bg-emerald-500/15 text-emerald-400
-                            {% elif order.status == 'cancelled' %}bg-red-500/15 text-red-400
-                            {% elif order.status == 'pending' %}bg-yellow-500/15 text-yellow-400
-                            {% else %}bg-blue-500/15 text-blue-400{% endif %}">
-                            {{ order.status_display }}
-                        </span>
-                    </td>
-                    <td class="py-3 text-neutral-500 text-xs">{{ order.created_at.strftime('%b %d, %H:%M') }}</td>
+                <tr>
+                    <td><a href="{{ url_for('orders.track', order_id=order.id) }}" class="font-bold text-white hover:text-brand-orange">#{{ order.id }}</a></td>
+                    <td class="text-neutral-300">{{ order.user.username }}</td>
+                    <td class="font-bold text-white">Rs. {{ "%.0f"|format(order.total_amount) }}</td>
+                    <td>{{ ui.status_badge(order) }}</td>
+                    <td class="text-neutral-500 text-xs">{{ order.created_at.strftime('%b %d, %H:%M') }}</td>
                 </tr>
                 {% else %}
-                <tr><td colspan="5" class="py-10 text-center text-neutral-500">No recent orders.</td></tr>
+                <tr><td colspan="5" class="py-12 text-center text-neutral-500">No orders yet.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

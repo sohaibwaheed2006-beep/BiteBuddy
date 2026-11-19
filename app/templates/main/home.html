@@ -1,376 +1,194 @@
 {% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
 
-{% block title %}Home - BiteBuddy{% endblock %}
-
-{% block extra_css %}
-<style>
-    /* Pulse Badge Glow Animation */
-    .pulse-badge {
-        position: absolute; top: 15px; right: 15px;
-        background: var(--brand-red); color: white;
-        padding: 5px 14px; border-radius: 20px;
-        font-weight: 800; font-size: 0.8rem;
-        box-shadow: 0 0 0 0 rgba(255,69,0,0.5);
-        animation: badgePulse 2s infinite;
-        z-index: 10; letter-spacing: 0.5px;
-    }
-    @keyframes badgePulse {
-        0%   { transform: scale(.95); box-shadow: 0 0 0 0   rgba(255,69,0,.7); }
-        70%  { transform: scale(1);   box-shadow: 0 0 0 10px rgba(255,69,0,0); }
-        100% { transform: scale(.95); box-shadow: 0 0 0 0   rgba(255,69,0,0); }
-    }
-    .float-bg { animation: floatAnim 6s ease-in-out infinite; }
-    @keyframes floatAnim {
-        0%   { transform: translateY(0)    rotate(0deg); }
-        50%  { transform: translateY(-15px) rotate(5deg); }
-        100% { transform: translateY(0)    rotate(0deg); }
-    }
-
-    /* ── Exploded food viewer ── */
-    #hero-3d-container {
-        display: flex; align-items: center; justify-content: center;
-        position: relative; overflow: visible;
-    }
-    /* Smooth layer transition */
-    .layer-stack { transition: opacity .5s ease, transform .5s ease; }
-    .layer-label { transition: opacity .4s ease, transform .4s ease; }
-    /* Floating ingredients chip decals */
-    .hero-chip {
-        position: absolute; font-size: 2rem;
-        animation: chipFloat 5s ease-in-out infinite;
-        pointer-events: none; opacity: .55;
-        filter: drop-shadow(0 4px 8px rgba(0,0,0,.5));
-    }
-    @keyframes chipFloat {
-        0%,100% { transform: translateY(0)    rotate(0deg); }
-        50%      { transform: translateY(-18px) rotate(12deg); }
-    }
-    /* Glow ring behind food */
-    .hero-glow-ring {
-        position: absolute;
-        width: 360px; height: 360px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(255,107,53,.22) 0%, rgba(255,107,53,.06) 55%, transparent 72%);
-        pointer-events: none;
-        animation: glowPulse 3s ease-in-out infinite;
-    }
-    @keyframes glowPulse {
-        0%,100% { transform: scale(1);    opacity: .8; }
-        50%      { transform: scale(1.08); opacity: 1;  }
-    }
-    /* Hover-to-explode: show layers on parent hover */
-    #food-viewer:hover .hero-food-img { opacity: 0 !important; transform: scale(.7) !important; }
-    #food-viewer:hover .layer-stack    { opacity: 1 !important; transform: scale(1)  !important; }
-    #food-viewer:hover .layer-label    { opacity: 1 !important; transform: translateX(0) !important; }
-</style>
-{% endblock %}
+{% block title %}BiteBuddy — Hot food, delivered in 3D{% endblock %}
+{% block main_class %}{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="relative min-h-[75vh] flex items-center mb-16 pt-6 select-none overflow-hidden">
-    <!-- Floating background ingredient decals -->
-    <div class="absolute inset-0 pointer-events-none opacity-30">
-        <i class="bi bi-egg-fried text-5xl text-brand-gold/30 absolute top-[15%] left-[5%] float-bg" style="animation-delay: 0s;"></i>
-        <i class="bi bi-brightness-high text-4xl text-brand-yellow/20 absolute bottom-[25%] left-[12%] float-bg" style="animation-delay: 2s;"></i>
-        <i class="bi bi-stars text-5xl text-brand-orange/30 absolute top-[25%] right-[8%] float-bg" style="animation-delay: 1.5s;"></i>
-        <i class="bi bi-cup-hot text-6xl text-brand-gold/20 absolute bottom-[15%] right-[15%] float-bg" style="animation-delay: 4.5s;"></i>
-    </div>
+<!-- ═════════════ HERO ═════════════ -->
+<section class="bb-hero overflow-hidden" data-food3d-scroll>
+    <div class="bb-floor" aria-hidden="true"></div>
+    <div class="relative z-[2] max-w-7xl w-full mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-6 lg:gap-4 items-center">
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 w-full items-center relative z-10">
-        <!-- Hero Details -->
-        <div class="flex flex-col gap-6 text-center lg:text-left">
-            <div class="hero-badge self-center lg:self-start bg-brand-orange/10 border border-brand-orange/30 text-brand-orange px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase">
-                ✨ Taste Beyond Expectations
+        <!-- Copy -->
+        <div class="flex flex-col gap-7 text-center lg:text-left order-2 lg:order-1">
+            <div class="flex justify-center lg:justify-start" data-reveal>
+                <span class="bb-chip bb-chip--brand"><span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399] animate-pulse"></span> Kitchen open · delivering now</span>
             </div>
-            
-            <h1 class="text-5xl sm:text-6xl md:text-7xl font-display font-black leading-[1.1] tracking-tight text-white">
-                <span class="inline-block hero-title-word">Delicious</span>
-                <span class="inline-block hero-title-word text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-brand-accent">Food</span><br class="hidden sm:inline">
-                <span class="inline-block hero-title-word">Made</span>
-                <span class="inline-block hero-title-word">With</span>
-                <span class="inline-block hero-title-word text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-brand-gold">Love</span>
+
+            <h1 class="bb-hero__title">
+                <span class="line"><span>Crave it.</span></span>
+                <span class="line"><span class="bb-gradient-text">Tap it.</span></span>
+                <span class="line"><span>Bite it.</span></span>
             </h1>
-            
-            <p class="hero-subtitle text-neutral-400 text-base md:text-lg max-w-md mx-auto lg:mx-0 leading-relaxed">
-                Experience gourmet quality and mouthwatering flavors made fresh daily. Order now and track it hot straight to your home!
+
+            <p class="text-base md:text-lg text-neutral-400 max-w-lg mx-auto lg:mx-0 leading-relaxed" data-reveal style="--reveal-delay:.25s">
+                Smash burgers, stone-baked pizza and crispy chicken — built fresh the moment you order and tracked live all the way to your door.
             </p>
-            
-            <div class="hero-cta-btn flex flex-wrap gap-4 justify-center lg:justify-start mt-4">
-                <a href="{{ url_for('menu.browse') }}" class="btn btn-primary px-8 py-4 text-base shadow-orange-glow">
-                    <i class="bi bi-basket2-fill"></i> Explore Menu
-                </a>
+
+            <div class="flex flex-wrap gap-3 justify-center lg:justify-start" data-reveal style="--reveal-delay:.35s">
+                <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg" data-magnetic><i class="bi bi-lightning-charge-fill"></i> Order now</a>
                 {% if not current_user.is_authenticated %}
-                <a href="{{ url_for('auth.register') }}" class="btn btn-outline px-8 py-4 text-base">
-                    <i class="bi bi-person-fill-plus"></i> Join Now
-                </a>
+                <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--ghost bb-btn--lg"><i class="bi bi-person-plus"></i> Create account</a>
+                {% else %}
+                <a href="{{ url_for('orders.history') if not current_user.is_admin else url_for('admin.dashboard') }}" class="bb-btn bb-btn--ghost bb-btn--lg"><i class="bi bi-geo-alt"></i> {{ 'Track orders' if not current_user.is_admin else 'Dashboard' }}</a>
                 {% endif %}
             </div>
+
+            <div class="flex flex-wrap items-center justify-center lg:justify-start gap-8 pt-2" data-reveal style="--reveal-delay:.45s">
+                <div class="bb-hero__stat"><strong><span data-count="30">30</span><span class="text-brand-orange">min</span></strong><span>Average delivery</span></div>
+                <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
+                <div class="bb-hero__stat"><strong><span data-count="{{ item_count }}">{{ item_count }}</span><span class="text-brand-orange">+</span></strong><span>Dishes on the menu</span></div>
+                <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
+                <div class="bb-hero__stat"><strong><span data-count="4.9" data-decimals="1">4.9</span><i class="bi bi-star-fill text-brand-yellow text-xl ml-1"></i></strong><span>Customer rating</span></div>
+            </div>
         </div>
-        
-        <!-- Hero Animated Food Viewer -->
-        <div id="food-viewer" class="relative flex justify-center items-center h-[480px] md:h-[560px] cursor-pointer select-none">
 
-            <!-- Glowing radial backdrop -->
-            <div class="hero-glow-ring"></div>
-
-            <!-- Floating ingredient emoji decals -->
-            <span class="hero-chip" style="top:8%;  left:4%;  animation-delay:0s;   animation-duration:5.2s;">🧅</span>
-            <span class="hero-chip" style="top:18%; right:3%; animation-delay:1s;   animation-duration:4.6s;">🍅</span>
-            <span class="hero-chip" style="top:62%; left:2%;  animation-delay:2s;   animation-duration:6s;">🥬</span>
-            <span class="hero-chip" style="top:70%; right:5%; animation-delay:0.5s; animation-duration:5.8s;">🧀</span>
-            <span class="hero-chip" style="top:40%; left:0%;  animation-delay:3s;   animation-duration:4.8s;">🫙</span>
-            <span class="hero-chip" style="bottom:8%;left:8%; animation-delay:1.5s; animation-duration:5.5s;">🌿</span>
-
-            <!-- 3D Container -->
-            <div id="hero-3d-container" class="w-full h-full relative z-10"></div>
-
-            <!-- Model Toggle Pills -->
-            <div class="absolute bottom-5 flex bg-brand-charcoal/90 backdrop-blur border border-white/10 p-1.5 rounded-full z-20 shadow-glass gap-0.5">
-                <button id="btn-burger"
-                    onclick="window.food3D && window.food3D.setModel('burger'); document.getElementById('btn-burger').className='px-5 py-2 rounded-full text-xs font-black transition-all bg-brand-orange text-white shadow-orange-glow'; document.getElementById('btn-pizza').className='px-5 py-2 rounded-full text-xs font-black transition-all text-neutral-300 hover:text-white';"
-                    class="px-5 py-2 rounded-full text-xs font-black transition-all bg-brand-orange text-white shadow-orange-glow">Burger 🍔</button>
-                <button id="btn-pizza"
-                    onclick="window.food3D && window.food3D.setModel('pizza'); document.getElementById('btn-pizza').className='px-5 py-2 rounded-full text-xs font-black transition-all bg-brand-orange text-white shadow-orange-glow'; document.getElementById('btn-burger').className='px-5 py-2 rounded-full text-xs font-black transition-all text-neutral-300 hover:text-white';"
-                    class="px-5 py-2 rounded-full text-xs font-black transition-all text-neutral-300 hover:text-white">Pizza 🍕</button>
+        <!-- 3D stage -->
+        <div class="relative order-1 lg:order-2 h-[380px] sm:h-[520px] lg:h-[640px]" data-reveal="zoom">
+            <div class="bb3d__glow" aria-hidden="true"></div>
+            <div class="bb3d" id="hero-stage" data-food3d data-food3d-mode="hero" data-food3d-model="burger">
+                <img class="bb3d__fallback" src="{{ asset('images/hero_burger.webp') }}" alt="A stacked BiteBuddy burger" width="640" height="640">
+                <div class="bb3d__labels" aria-hidden="true"></div>
+                <div class="bb3d__hint"><i class="bi bi-hand-index-thumb"></i> Drag to spin · scroll to explode</div>
             </div>
 
-            <!-- Hover & 360° Rotation instruction badge -->
-            <div class="absolute top-3 pointer-events-none text-[9px] text-neutral-400 font-black uppercase tracking-widest bg-brand-dark/80 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/10 flex items-center gap-1.5 shadow-glass">
-                <i class="bi bi-arrow-repeat text-brand-orange animate-spin"></i> Move Mouse to Rotate 360° & Explode
+            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-[3] flex items-center gap-2">
+                <div class="bb-segment" role="group" aria-label="Choose a 3D model">
+                    <span class="bb-segment__pill"></span>
+                    <button type="button" class="is-active" aria-pressed="true" data-food3d-switch="burger" data-target="#hero-stage" data-fallback="{{ asset('images/hero_burger.webp') }}">🍔 Burger</button>
+                    <button type="button" aria-pressed="false" data-food3d-switch="pizza" data-target="#hero-stage" data-fallback="{{ asset('images/hero_pizza.webp') }}">🍕 Pizza</button>
+                </div>
+                <button type="button" class="bb-btn bb-btn--ghost bb-btn--sm !py-3" data-food3d-explode data-target="#hero-stage" aria-pressed="false">
+                    <i class="bi bi-layers-half"></i> <span data-label>Explode</span>
+                </button>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Browse Categories -->
-<section class="mb-20 select-none relative z-10">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-white/10 pb-4 gap-4">
-        <div>
-            <span class="text-xs font-black uppercase tracking-widest text-brand-orange flex items-center gap-2 mb-1">
-                <i class="bi bi-grid-fill"></i> Delicious Diversity
-            </span>
-            <h2 class="text-3xl md:text-4xl font-display font-black text-white flex items-center gap-3">
-                Browse Categories
-            </h2>
-        </div>
-        <a href="{{ url_for('menu.browse') }}" class="text-xs font-bold text-neutral-400 hover:text-brand-orange transition-all flex items-center gap-1 uppercase tracking-wider group">
-            Explore All <i class="bi bi-arrow-right group-hover:translate-x-1 transition-transform"></i>
-        </a>
-    </div>
-    
-    <div class="category-grid grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-5">
-        {% for cat in categories %}
-        <a href="{{ url_for('menu.browse', category=cat.id) }}" 
-           class="category-card group bg-brand-charcoal/60 backdrop-blur-xl border border-white/10 hover:border-brand-orange/50 rounded-3xl p-5 text-center flex flex-col items-center gap-3 transition-all duration-500 hover:-translate-y-3 hover:shadow-orange-glow relative overflow-hidden">
-            <!-- Glow backdrop inside card -->
-            <div class="absolute -inset-1 bg-gradient-to-b from-brand-orange/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
-            
-            <!-- Category Image avatar -->
-            <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-brand-orange shadow-lg transition-all duration-500 relative z-10">
-                <img src="{{ cat.image_url }}" alt="{{ cat.name }}" class="w-full h-full object-cover group-hover:scale-115 transition-transform duration-700" onerror="this.src='/static/images/default_cat.jpg'">
-            </div>
-            
-            <div class="relative z-10">
-                <h3 class="text-sm font-bold text-white group-hover:text-brand-orange transition-colors leading-tight">{{ cat.name }}</h3>
-                <span class="text-[10px] text-neutral-500 group-hover:text-neutral-300 transition-colors font-medium mt-0.5 block">
-                    {{ cat.items|length }} Items
-                </span>
-            </div>
-        </a>
-        {% else %}
-        <p class="text-neutral-500 col-span-full text-center py-8">No categories available yet.</p>
+<!-- ═════════════ MARQUEE ═════════════ -->
+<div class="bb-marquee relative z-[2] mb-24" aria-hidden="true">
+    <div class="bb-marquee__track">
+        {% for _ in range(2) %}
+        <span class="bb-marquee__item is-solid">Smash Burgers <span class="emoji">🍔</span></span>
+        <span class="bb-marquee__item">Stone-baked Pizza <span class="emoji">🍕</span></span>
+        <span class="bb-marquee__item is-solid">Crispy Chicken <span class="emoji">🍗</span></span>
+        <span class="bb-marquee__item">Loaded Wraps <span class="emoji">🌯</span></span>
+        <span class="bb-marquee__item is-solid">Thick Shakes <span class="emoji">🥤</span></span>
+        <span class="bb-marquee__item">Molten Desserts <span class="emoji">🍫</span></span>
         {% endfor %}
     </div>
-</section>
+</div>
 
-<!-- Exclusive Deals -->
-<section class="mb-20 relative z-10">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-white/10 pb-4 gap-4">
-        <div>
-            <span class="text-xs font-black uppercase tracking-widest text-brand-gold flex items-center gap-2 mb-1">
-                <i class="bi bi-lightning-charge-fill"></i> Limited Time Offers
-            </span>
-            <h2 class="text-3xl md:text-4xl font-display font-black text-white flex items-center gap-3">
-                Exclusive Deals
-            </h2>
-        </div>
-        <div class="flex items-center gap-2 text-xs font-bold text-neutral-400 bg-white/5 border border-white/10 px-4 py-2 rounded-full">
-            <i class="bi bi-clock-history text-brand-orange animate-spin"></i>
-            <span>Offers Refresh Daily</span>
-        </div>
-    </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6">
 
-    <!-- Snap Scroll container for deals on mobile, grid on desktop -->
-    <div class="deal-grid flex lg:grid lg:grid-cols-4 gap-6 overflow-x-auto lg:overflow-x-visible snap-x snap-mandatory pb-4 lg:pb-0 scroll-smooth">
-        
-        <!-- Deal 1 -->
-        <div class="deal-card card snap-center min-w-[290px] lg:min-w-0 flex-shrink-0 flex flex-col group border border-white/10 hover:border-brand-orange/40 transition-all duration-500" style="background: #121215 !important;">
-            <div class="relative overflow-hidden aspect-[4/3] rounded-t-3xl">
-                <img src="/static/images/item_10pc.jpg" alt="Family Feast" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                <div class="pulse-badge">SAVE 20%</div>
-                <div class="absolute bottom-3 left-3 bg-brand-dark/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-brand-gold uppercase tracking-wider border border-white/10">
-                    <i class="bi bi-star-fill"></i> Best Seller
-                </div>
-            </div>
-            <div class="p-6 flex flex-col flex-1 gap-3" style="background: #121215 !important;">
-                <h3 class="text-xl font-display font-black text-white group-hover:text-brand-orange transition-colors block">Family Feast Deal</h3>
-                <p class="text-xs text-neutral-300 font-medium leading-relaxed flex-1">10-Piece Crispy Chicken Bucket + 2 Large Fries + 1.5L Ice-Cold Drink</p>
-                <div class="flex justify-between items-center mt-3 pt-3 border-t border-white/10">
-                    <div>
-                        <span class="text-xs text-neutral-400 line-through block">Rs. 3120</span>
-                        <span class="text-xl font-display font-black text-brand-orange">Rs. 2500</span>
+    <!-- ═════════════ CATEGORIES ═════════════ -->
+    <section class="bb-section">
+        {{ ui.section_head('Explore the kitchen', 'Pick your <span class="bb-gradient-text">craving</span>', url_for('menu.browse'), 'Full menu') }}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            {% for cat in categories %}
+            {{ ui.category_card(cat, delay=loop.index0 * 0.06) }}
+            {% else %}
+            <p class="text-neutral-500 col-span-full text-center py-8">No categories available yet.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- ═════════════ DEALS ═════════════ -->
+    <section class="bb-section">
+        {{ ui.section_head('Limited-time offers', 'Deals worth the <span class="bb-gold-text">hype</span>', eyebrow_icon='bi-lightning-charge-fill') }}
+        {% set deals = [
+            ('Family Feast', '10-piece crispy bucket + 2 large fries + 1.5L drink', 3120, 2500, 'item_10pc.jpg', 'SAVE 20%', 'Best seller', 'chicken'),
+            ('Burger Duo', '2 classic smash burgers + 2 soft drinks + fries', 2300, 1850, 'item_smash.jpg', 'HOT DEAL', 'Trending', 'burger'),
+            ('Pizza Party', 'Large supreme pizza + 6 spicy wings + 1L cola', 2750, 2200, 'item_supreme.jpg', 'POPULAR', 'Recommended', 'pizza'),
+            ('Wrap Pack', '2 chicken wraps + onion rings + 2 mint lemonades', 1800, 1500, 'item_wrap.jpg', 'LUNCH', 'Combo', 'wrap'),
+        ] %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {% for name, desc, was, now, img, badge, tag, q in deals %}
+            <article class="bb-deal" data-tilt data-tilt-max="8" data-reveal style="--reveal-delay: {{ loop.index0 * 0.08 }}s">
+                <img class="bb-deal__img" src="{{ url_for('static', filename='images/' ~ img) }}" alt="{{ name }}" loading="lazy" decoding="async">
+                <div class="bb-glare"></div>
+                <span class="bb-deal__badge">{{ badge }}</span>
+                <div class="bb-deal__body">
+                    <span class="bb-chip w-max"><i class="bi bi-fire text-brand-orange"></i> {{ tag }}</span>
+                    <h3 class="font-display font-black text-2xl text-white leading-tight">{{ name }}</h3>
+                    <p class="text-sm text-neutral-300 leading-relaxed">{{ desc }}</p>
+                    <div class="flex items-end justify-between gap-3 pt-2">
+                        <div>
+                            <span class="block text-xs text-neutral-400 line-through">Rs. {{ was }}</span>
+                            <span class="bb-price text-2xl"><small>Rs.</small>{{ now }}</span>
+                        </div>
+                        <a href="{{ url_for('menu.search', q=q) }}" class="bb-btn bb-btn--light bb-btn--sm">Grab it <i class="bi bi-arrow-up-right"></i></a>
                     </div>
-                    <a href="{{ url_for('menu.browse') }}" class="btn btn-primary btn-sm text-xs py-2.5 px-4 shadow-orange-glow">
-                        <i class="bi bi-cart-plus-fill"></i> Order Deal
-                    </a>
                 </div>
-            </div>
+            </article>
+            {% endfor %}
         </div>
+    </section>
 
-        <!-- Deal 2 -->
-        <div class="deal-card card snap-center min-w-[290px] lg:min-w-0 flex-shrink-0 flex flex-col group border border-white/10 hover:border-brand-orange/40 transition-all duration-500" style="background: #121215 !important;">
-            <div class="relative overflow-hidden aspect-[4/3] rounded-t-3xl">
-                <img src="/static/images/item_smash.jpg" alt="Burger Duo" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                <div class="pulse-badge" style="background: var(--brand-orange); animation-delay: 0.5s;">HOT DEAL</div>
-                <div class="absolute bottom-3 left-3 bg-brand-dark/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-brand-orange uppercase tracking-wider border border-white/10">
-                    <i class="bi bi-fire"></i> Trending
+    <!-- ═════════════ HOW IT WORKS ═════════════ -->
+    <section class="bb-section">
+        {{ ui.section_head('Door to door in three taps', 'How <span class="bb-gradient-text">BiteBuddy</span> works') }}
+        {% set steps = [
+            ('bi-grid-1x2-fill', 'bi-hand-index-thumb-fill', 'Pick your bites', 'Browse the full menu, customise sizes and add-ons, and preview burgers and pizzas in 3D.'),
+            ('bi-fire', 'bi-egg-fried', 'We cook it fresh', 'Your order hits the grill the moment you check out — never pre-made, never sitting under a lamp.'),
+            ('bi-bicycle', 'bi-geo-alt-fill', 'Track it live', 'Follow every step from kitchen to doorstep with live order tracking. Pay cash or card.'),
+        ] %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {% for front, back, title, text in steps %}
+            <div class="bb-step bb-card" data-tilt data-reveal style="--reveal-delay: {{ loop.index0 * 0.1 }}s">
+                <div class="bb-glare"></div>
+                <span class="bb-step__num">0{{ loop.index }}</span>
+                <div class="bb-cube" aria-hidden="true">
+                    <span class="bb-cube__face bb-cube__face--front"><i class="bi {{ front }}"></i></span>
+                    <span class="bb-cube__face bb-cube__face--back"><i class="bi {{ back }}"></i></span>
+                    <span class="bb-cube__face bb-cube__face--right"></span>
+                    <span class="bb-cube__face bb-cube__face--left"></span>
+                    <span class="bb-cube__face bb-cube__face--top"></span>
+                    <span class="bb-cube__face bb-cube__face--bottom"></span>
                 </div>
+                <h3 class="font-display font-black text-xl text-white mb-2" style="transform: translateZ(30px)">{{ title }}</h3>
+                <p class="text-sm text-neutral-400 leading-relaxed" style="transform: translateZ(20px)">{{ text }}</p>
             </div>
-            <div class="p-6 flex flex-col flex-1 gap-3" style="background: #121215 !important;">
-                <h3 class="text-xl font-display font-black text-white group-hover:text-brand-orange transition-colors block">Burger Duo</h3>
-                <p class="text-xs text-neutral-300 font-medium leading-relaxed flex-1">2 Classic Beef Smash Burgers + 2 Soft Drinks + Regular Crispy Fries</p>
-                <div class="flex justify-between items-center mt-3 pt-3 border-t border-white/10">
-                    <div>
-                        <span class="text-xs text-neutral-400 line-through block">Rs. 2300</span>
-                        <span class="text-xl font-display font-black text-brand-orange">Rs. 1850</span>
-                    </div>
-                    <a href="{{ url_for('menu.browse') }}" class="btn btn-primary btn-sm text-xs py-2.5 px-4 shadow-orange-glow">
-                        <i class="bi bi-cart-plus-fill"></i> Order Deal
-                    </a>
-                </div>
-            </div>
+            {% endfor %}
         </div>
+    </section>
 
-        <!-- Deal 3 -->
-        <div class="deal-card card snap-center min-w-[290px] lg:min-w-0 flex-shrink-0 flex flex-col group border border-white/10 hover:border-brand-orange/40 transition-all duration-500" style="background: #121215 !important;">
-            <div class="relative overflow-hidden aspect-[4/3] rounded-t-3xl">
-                <img src="/static/images/cat_pizza.jpg" alt="Pizza Party" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src='/static/images/default_food.jpg'">
-                <div class="pulse-badge" style="background: var(--brand-gold); animation-delay: 1.0s;">POPULAR</div>
-                <div class="absolute bottom-3 left-3 bg-brand-dark/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-emerald-400 uppercase tracking-wider border border-white/10">
-                    <i class="bi bi-check-circle-fill"></i> Recommended
-                </div>
-            </div>
-            <div class="p-6 flex flex-col flex-1 gap-3" style="background: #121215 !important;">
-                <h3 class="text-xl font-display font-black text-white group-hover:text-brand-orange transition-colors block">Pizza Party</h3>
-                <p class="text-xs text-neutral-300 font-medium leading-relaxed flex-1">1 Large Supreme Pizza + 6 Spicy Wings + 1L Cola</p>
-                <div class="flex justify-between items-center mt-3 pt-3 border-t border-white/10">
-                    <div>
-                        <span class="text-xs text-neutral-400 line-through block">Rs. 2750</span>
-                        <span class="text-xl font-display font-black text-brand-orange">Rs. 2200</span>
-                    </div>
-                    <a href="{{ url_for('menu.browse') }}" class="btn btn-primary btn-sm text-xs py-2.5 px-4 shadow-orange-glow">
-                        <i class="bi bi-cart-plus-fill"></i> Order Deal
-                    </a>
-                </div>
-            </div>
+    <!-- ═════════════ POPULAR ═════════════ -->
+    <section class="bb-section">
+        {{ ui.section_head('Most ordered this week', 'Popular <span class="bb-gradient-text">right now</span>', url_for('menu.browse'), 'See everything', 'bi-fire') }}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {% for item in popular_items %}
+            {{ ui.food_card(item, delay=(loop.index0 % 4) * 0.07) }}
+            {% else %}
+            <p class="text-neutral-500 col-span-full text-center py-8">No items available yet.</p>
+            {% endfor %}
         </div>
+    </section>
 
-        <!-- Deal 4 -->
-        <div class="deal-card card snap-center min-w-[290px] lg:min-w-0 flex-shrink-0 flex flex-col group border border-white/10 hover:border-brand-orange/40 transition-all duration-500" style="background: #121215 !important;">
-            <div class="relative overflow-hidden aspect-[4/3] rounded-t-3xl">
-                <img src="/static/images/item_wrap.jpg" alt="Snack Pack" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                <div class="pulse-badge" style="background: #2d9cdb; animation-delay: 1.5s;">LUNCH DEAL</div>
-                <div class="absolute bottom-3 left-3 bg-brand-dark/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-blue-400 uppercase tracking-wider border border-white/10">
-                    <i class="bi bi-cup-hot-fill"></i> Combo
-                </div>
-            </div>
-            <div class="p-6 flex flex-col flex-1 gap-3" style="background: #121215 !important;">
-                <h3 class="text-xl font-display font-black text-white group-hover:text-brand-orange transition-colors block">Wrap Snack Pack</h3>
-                <p class="text-xs text-neutral-300 font-medium leading-relaxed flex-1">2 Chicken Wraps + Battered Onion Rings + 2 Ice Mint Lemonades</p>
-                <div class="flex justify-between items-center mt-3 pt-3 border-t border-white/10">
-                    <div>
-                        <span class="text-xs text-neutral-400 line-through block">Rs. 1800</span>
-                        <span class="text-xl font-display font-black text-brand-orange">Rs. 1500</span>
-                    </div>
-                    <a href="{{ url_for('menu.browse') }}" class="btn btn-primary btn-sm text-xs py-2.5 px-4 shadow-orange-glow">
-                        <i class="bi bi-cart-plus-fill"></i> Order Deal
-                    </a>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</section>
-
-<!-- Popular Now Items -->
-<section class="mb-20 relative z-10">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-white/10 pb-4 gap-4">
-        <div>
-            <span class="text-xs font-black uppercase tracking-widest text-brand-red flex items-center gap-2 mb-1">
-                <i class="bi bi-fire"></i> Most Ordered Dishes
-            </span>
-            <h2 class="text-3xl md:text-4xl font-display font-black text-white flex items-center gap-3">
-                Popular Now
-            </h2>
-        </div>
-        <a href="{{ url_for('menu.browse') }}" class="text-xs font-bold text-brand-orange hover:underline uppercase tracking-wider flex items-center gap-1.5 group">
-            View Full Menu <i class="bi bi-arrow-right group-hover:translate-x-1 transition-transform"></i>
-        </a>
-    </div>
-    
-    <div class="menu-item-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {% for item in popular_items %}
-        <div class="menu-item-card card flex flex-col group border border-white/10 hover:border-brand-orange/40 transition-all duration-500" style="background: #121215 !important;">
-            <a href="{{ url_for('menu.item_detail', item_id=item.id) }}" class="block relative overflow-hidden aspect-[4/3] rounded-t-3xl">
-                <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src='/static/images/default_food.jpg'">
-                
-                <!-- Rating badge -->
-                <div class="absolute top-3 right-3 bg-brand-dark/90 backdrop-blur px-3 py-1 rounded-full text-xs font-black text-brand-gold flex items-center gap-1 border border-white/10">
-                    <i class="bi bi-star-fill text-yellow-400"></i> 4.9
-                </div>
-                
-                {% if item.category %}
-                <div class="absolute bottom-3 left-3 bg-brand-orange/90 backdrop-blur text-white px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">
-                    {{ item.category.name }}
-                </div>
-                {% endif %}
-            </a>
-            
-            <div class="p-6 flex flex-col flex-1 gap-3" style="background: #121215 !important;">
-                <div class="flex justify-between items-start gap-2">
-                    <a href="{{ url_for('menu.item_detail', item_id=item.id) }}" class="hover:text-brand-orange transition-colors block">
-                        <h3 class="text-base font-bold text-white group-hover:text-brand-orange transition-colors line-clamp-1 leading-snug block">{{ item.name }}</h3>
-                    </a>
-                    <span class="text-base font-display font-black text-brand-orange flex-shrink-0">Rs. {{ "%.0f"|format(item.price) }}</span>
-                </div>
-                
-                <p class="text-xs text-neutral-300 font-medium line-clamp-2 leading-relaxed flex-1">
-                    {{ item.description }}
-                </p>
-                
-                <div class="mt-2 pt-3 border-t border-white/10">
-                    {% if current_user.is_authenticated %}
-                    <form action="{{ url_for('cart.add_to_cart', item_id=item.id) }}" method="POST" class="add-to-cart-form w-full">
-                        <input type="hidden" name="quantity" value="1">
-                        <button type="submit" class="btn btn-primary w-full shadow-orange-glow py-3 text-xs font-bold">
-                            <i class="bi bi-cart-plus-fill"></i> Add to Cart
-                        </button>
-                    </form>
-                    {% else %}
-                    <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-outline w-full py-3 text-xs font-bold">
-                        <i class="bi bi-box-arrow-in-right"></i> Login to Order
-                    </a>
+    <!-- ═════════════ CTA ═════════════ -->
+    <section class="bb-section !mb-8">
+        <div class="bb-cta" data-reveal="zoom">
+            <span class="bb-cta__food right-[6%] top-[12%]" style="animation-delay:-1s">🍔</span>
+            <span class="bb-cta__food right-[22%] bottom-[10%] hidden md:block" style="animation-delay:-3s">🍟</span>
+            <span class="bb-cta__food right-[38%] top-[8%] hidden lg:block" style="animation-delay:-2s">🥤</span>
+            <div class="relative max-w-xl">
+                <span class="bb-chip mb-5 !bg-black/20 !border-white/20"><i class="bi bi-gift-fill"></i> Free delivery on your first order</span>
+                <h2 class="font-display font-black text-4xl md:text-6xl leading-[.95] tracking-tight text-white">Hungry already?<br>Let's fix that.</h2>
+                <p class="text-white/80 mt-4 mb-8 text-base md:text-lg">Your next favourite meal is a few taps away. Hot, fast, and exactly how you like it.</p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--light bb-btn--lg" data-magnetic><i class="bi bi-bag-heart-fill"></i> Start your order</a>
+                    {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--lg !bg-black/25 !text-white hover:!bg-black/40">Join BiteBuddy</a>
                     {% endif %}
                 </div>
             </div>
         </div>
-        {% else %}
-        <p class="text-neutral-500 col-span-full text-center py-8">No items available yet.</p>
-        {% endfor %}
-    </div>
-</section>
+    </section>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/hero3d.js') }}"></script>
+<script type="module" src="{{ asset('js/food3d.js') }}"></script>
 {% endblock %}

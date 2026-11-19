@@ -1,70 +1,77 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}{{ action }} Menu Item - Admin{% endblock %}
+{% import "_macros.html" as ui with context %}
+{% block title %}{{ action }} item — BiteBuddy Admin{% endblock %}
 
 {% block admin_content %}
-<div class="flex items-center gap-4 mb-6">
-    <a href="{{ url_for('admin.manage_items') }}" class="text-sm text-neutral-400 hover:text-brand-orange transition-all flex items-center gap-1.5">
-        <i class="bi bi-arrow-left"></i> Back to Items
-    </a>
-    <h1 class="text-2xl font-display font-black text-white">{{ action }} Menu Item</h1>
-</div>
+<a href="{{ url_for('admin.manage_items') }}" class="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition mb-6"><i class="bi bi-arrow-left"></i> Back to items</a>
 
-<div class="form-container max-w-2xl">
-    <form method="POST" class="flex flex-col gap-5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div class="form-group">
-                <label>Item Name</label>
-                <input type="text" name="name" class="form-control" required
-                       placeholder="e.g. Smash Burger" value="{{ item.name if item else '' }}">
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6 items-start">
+    <form method="POST" class="bb-glass p-6 sm:p-8 flex flex-col gap-5" data-loading data-reveal>
+        {{ ui.csrf() }}
+        <h1 class="font-display font-black text-3xl text-white">{{ action }} menu item</h1>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label class="bb-label" for="name">Item name</label>
+                <input type="text" id="name" name="name" class="bb-input" required maxlength="150" placeholder="e.g. Smash Burger" value="{{ item.name if item else '' }}">
             </div>
-            <div class="form-group">
-                <label>Price (Rs.)</label>
-                <input type="number" name="price" step="0.01" min="0" class="form-control" required
-                       placeholder="e.g. 550" value="{{ item.price if item else '' }}">
+            <div>
+                <label class="bb-label" for="price">Price (Rs.)</label>
+                <input type="number" id="price" name="price" step="1" min="1" class="bb-input" required placeholder="e.g. 850" value="{{ '%.0f'|format(item.price) if item else '' }}">
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div class="form-group">
-                <label>Category</label>
-                <select name="category_id" class="form-control bg-brand-charcoal" required>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label class="bb-label" for="category_id">Category</label>
+                <select id="category_id" name="category_id" class="bb-input" required>
                     {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if item and item.category_id == cat.id %}selected{% endif %}>
-                        {{ cat.name }}
-                    </option>
+                    <option value="{{ cat.id }}" {% if item and item.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-group">
-                <label>Image URL</label>
-                <input type="text" name="image_url" class="form-control"
-                       placeholder="/static/images/burger.jpg" value="{{ item.image_url if item else '' }}">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Description</label>
-            <textarea name="description" class="form-control" rows="4"
-                      placeholder="Short description of the item...">{{ item.description if item else '' }}</textarea>
-        </div>
-
-        <!-- Availability Toggle -->
-        <label class="flex items-center gap-4 p-4 bg-neutral-900 border border-white/5 rounded-2xl cursor-pointer hover:bg-white/5 transition-all">
-            <input type="checkbox" name="is_available" id="is_available"
-                   {% if not item or item.is_available %}checked{% endif %}
-                   class="w-5 h-5 rounded accent-brand-orange cursor-pointer">
             <div>
-                <p class="font-bold text-white text-sm">Item is currently available</p>
-                <p class="text-xs text-neutral-400 mt-0.5">Uncheck to hide from the menu temporarily</p>
+                <label class="bb-label" for="image_url">Image URL</label>
+                <input type="text" id="image_url" name="image_url" class="bb-input" placeholder="/static/images/item_smash.jpg" value="{{ item.image_url if item else '' }}">
             </div>
+        </div>
+
+        <div>
+            <label class="bb-label" for="description">Description</label>
+            <textarea id="description" name="description" class="bb-input" rows="4" placeholder="What makes this dish special?">{{ item.description if item else '' }}</textarea>
+        </div>
+
+        <label class="bb-check p-4 rounded-2xl bg-white/[.03] border border-white/10">
+            <input type="checkbox" name="is_available" {% if not item or item.is_available %}checked{% endif %}>
+            <span class="bb-check__box"></span>
+            <span><b class="text-white block">Available on the menu</b><span class="text-xs text-neutral-500">Untick to hide it temporarily</span></span>
         </label>
 
-        <div class="flex gap-4 mt-2">
-            <button type="submit" class="btn btn-primary shadow-orange-glow flex-1">
-                <i class="bi bi-floppy-fill"></i> Save Item
-            </button>
-            <a href="{{ url_for('admin.manage_items') }}" class="btn btn-outline">Cancel</a>
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="bb-btn bb-btn--primary flex-1 sm:flex-none"><i class="bi bi-check2-circle"></i> Save item</button>
+            <a href="{{ url_for('admin.manage_items') }}" class="bb-btn bb-btn--ghost">Cancel</a>
         </div>
     </form>
+
+    <aside class="bb-card p-5 xl:sticky xl:top-24" data-reveal>
+        <p class="text-[11px] font-black uppercase tracking-widest text-neutral-500 mb-3">Image preview</p>
+        <img id="img-preview" src="{{ item.image_url if item and item.image_url else '/static/images/default_food.jpg' }}" alt=""
+             class="w-full aspect-[4/3] object-cover rounded-2xl border border-white/10"
+             onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
+    </aside>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (() => {
+        const input = document.getElementById('image_url');
+        const img = document.getElementById('img-preview');
+        if (!input || !img) return;
+        input.addEventListener('change', () => {
+            img.onerror = () => { img.onerror = null; img.src = '/static/images/default_food.jpg'; };
+            img.src = input.value.trim() || '/static/images/default_food.jpg';
+        });
+    })();
+</script>
 {% endblock %}

@@ -1,83 +1,61 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Categories - Admin{% endblock %}
+{% import "_macros.html" as ui with context %}
+{% block title %}Categories — BiteBuddy Admin{% endblock %}
 
 {% block admin_content %}
-<div class="mb-6">
-    <h1 class="text-2xl font-display font-black text-white flex items-center gap-3">
-        <i class="bi bi-tags-fill text-brand-orange"></i> Categories
-    </h1>
+<div class="mb-8" data-reveal>
+    <span class="bb-eyebrow">Menu structure</span>
+    <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-2">Categories</h1>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-
-    <!-- Add Category Form -->
-    <div class="form-container md:col-span-1">
-        <h3 class="text-base font-display font-black text-white mb-5 border-b border-white/5 pb-4 flex items-center gap-2">
-            <i class="bi bi-plus-circle text-brand-orange"></i> Add Category
-        </h3>
-        <form method="POST" action="{{ url_for('admin.add_category') }}" class="flex flex-col gap-4">
-            <div class="form-group">
-                <label>Category Name</label>
-                <input type="text" name="name" class="form-control" placeholder="e.g. Burgers" required>
-            </div>
-            <div class="form-group">
-                <label>Image URL</label>
-                <input type="text" name="image_url" class="form-control" placeholder="/static/images/cat.jpg">
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" class="form-control" rows="3" placeholder="Short description..."></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary shadow-orange-glow">
-                <i class="bi bi-plus-lg"></i> Add Category
-            </button>
-        </form>
-    </div>
-
-    <!-- Categories Table -->
-    <div class="card md:col-span-2 overflow-hidden">
-        <div class="p-5 border-b border-white/5">
-            <h3 class="font-display font-black text-white text-base">All Categories ({{ categories|length }})</h3>
+<div class="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-6 items-start">
+    <form method="POST" action="{{ url_for('admin.add_category') }}" class="bb-glass p-6 flex flex-col gap-4" data-loading data-reveal>
+        {{ ui.csrf() }}
+        <h2 class="font-display font-black text-lg text-white flex items-center gap-2"><i class="bi bi-plus-circle text-brand-orange"></i> New category</h2>
+        <div>
+            <label class="bb-label" for="cat-name">Name</label>
+            <input type="text" id="cat-name" name="name" class="bb-input" placeholder="e.g. Breakfast" required maxlength="100">
         </div>
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="border-b border-white/5 text-xs text-neutral-500 uppercase tracking-wider">
-                    <th class="p-4 text-left">Name</th>
-                    <th class="p-4 text-left">Items</th>
-                    <th class="p-4 text-right">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cat in categories %}
-                <tr class="border-t border-white/5 hover:bg-white/2 transition-all">
-                    <td class="p-4">
-                        <div class="flex items-center gap-3">
-                            <img src="{{ cat.image_url }}" alt="{{ cat.name }}"
-                                 class="w-9 h-9 object-cover rounded-full border border-white/10"
-                                 onerror="this.src='/static/images/default_cat.jpg'">
-                            <span class="font-bold text-white">{{ cat.name }}</span>
-                        </div>
-                    </td>
-                    <td class="p-4">
-                        <span class="text-xs text-neutral-400 bg-white/5 border border-white/5 px-2.5 py-1 rounded-full">
-                            {{ cat.items|length }} items
-                        </span>
-                    </td>
-                    <td class="p-4 text-right">
-                        <form action="{{ url_for('admin.delete_category', cat_id=cat.id) }}" method="POST"
-                              onsubmit="return confirm('Warning: This will delete ALL items in this category. Continue?')">
-                            <button type="submit"
-                                    class="w-8 h-8 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 rounded-full text-red-400 hover:text-red-300 transition-all ml-auto">
-                                <i class="bi bi-trash-fill text-xs"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="3" class="py-10 text-center text-neutral-500">No categories yet.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div>
+            <label class="bb-label" for="cat-image">Image URL</label>
+            <input type="text" id="cat-image" name="image_url" class="bb-input" placeholder="/static/images/cat_burgers.jpg">
+        </div>
+        <div>
+            <label class="bb-label" for="cat-desc">Description</label>
+            <textarea id="cat-desc" name="description" class="bb-input" rows="3" placeholder="Short description…"></textarea>
+        </div>
+        <button type="submit" class="bb-btn bb-btn--primary"><i class="bi bi-plus-lg"></i> Add category</button>
+    </form>
+
+    <div class="bb-card overflow-hidden" data-reveal>
+        <div class="p-5 border-b border-white/5"><h2 class="font-display font-black text-lg text-white">All categories ({{ categories|length }})</h2></div>
+        <div class="overflow-x-auto">
+            <table class="bb-table min-w-[480px]">
+                <thead><tr><th>Name</th><th>Items</th><th class="!text-right">Action</th></tr></thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <img src="{{ cat.image_url }}" alt="" class="w-11 h-11 object-cover rounded-full border border-white/10" onerror="this.onerror=null;this.src='/static/images/default_cat.jpg'">
+                                <div><p class="font-bold text-white">{{ cat.name }}</p><p class="text-xs text-neutral-500 line-clamp-1 max-w-[280px]">{{ cat.description }}</p></div>
+                            </div>
+                        </td>
+                        <td><span class="bb-chip">{{ cat.items|length }} items</span></td>
+                        <td>
+                            <form action="{{ url_for('admin.delete_category', cat_id=cat.id) }}" method="POST" class="flex justify-end"
+                                  data-confirm="Delete “{{ cat.name }}” and ALL {{ cat.items|length }} items in it? This can't be undone.">
+                                {{ ui.csrf() }}
+                                <button type="submit" class="bb-btn bb-btn--icon !w-9 !h-9 hover:!text-red-300 hover:!bg-red-500/15" aria-label="Delete {{ cat.name }}" title="Delete"><i class="bi bi-trash3-fill text-xs"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="py-12 text-center text-neutral-500">No categories yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

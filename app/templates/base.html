@@ -1,211 +1,249 @@
+{% import "_macros.html" as ui with context %}
+{%- set ep = request.endpoint or '' -%}
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="BiteBuddy - Experience the ultimate modern 3D-animated food ordering experience.">
-    <title>{% block title %}BiteBuddy{% endblock %}</title>
-    
-    <!-- Google Fonts: Outfit (Display) & Inter (Body) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% block title %}BiteBuddy — Hot food, delivered in 3D{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}BiteBuddy — order burgers, pizza, fried chicken and more. Fresh, fast, and tracked live to your door.{% endblock %}">
+    <meta name="theme-color" content="#07070a">
+    <meta property="og:site_name" content="BiteBuddy">
+    <meta property="og:title" content="{{ self.title() }}">
+    <meta property="og:description" content="{{ self.meta_description() }}">
+    <meta property="og:image" content="{{ url_for('static', filename='images/cat_burgers.jpg', _external=True) }}">
+    <script>document.documentElement.classList.add('js');</script>
+
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+
+    <!-- Fonts & icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind (utility classes in templates) -->
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'brand-red': '#FF4500',
+                        'brand-red': '#FF3D1F',
                         'brand-orange': '#FF6B35',
                         'brand-yellow': '#FFB800',
                         'brand-gold': '#F2C94C',
-                        'brand-dark': '#070709',
-                        'brand-charcoal': '#121215',
-                        'brand-accent': '#FF5511',
+                        'brand-dark': '#07070A',
+                        'brand-charcoal': '#111117',
+                        'brand-accent': '#FF5A1F',
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        display: ['Outfit', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Outfit', 'sans-serif'] },
                     boxShadow: {
-                        'orange-glow': '0 0 20px rgba(255, 107, 53, 0.35)',
-                        'gold-glow': '0 0 20px rgba(242, 201, 76, 0.25)',
-                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.5)',
-                        'inner-glass': 'inset 0 1px 1px rgba(255, 255, 255, 0.05)',
-                    }
-                }
-            }
-        }
+                        'orange-glow': '0 14px 40px -12px rgba(255, 107, 53, .65)',
+                        'glass': '0 24px 60px -24px rgba(0, 0, 0, .85)',
+                        'inner-glass': 'inset 0 1px 1px rgba(255, 255, 255, .05)',
+                    },
+                },
+            },
+        };
     </script>
-    
-    <!-- Three.js, GSAP & ScrollTrigger CDNs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    
-    <!-- Custom Style Sheet & Theme Favicon -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.png') }}?v=2">
+
+    <!-- three.js as an ES module; local modules are cache-busted through the import map -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+            "bb-models": "{{ asset('js/food-models.js') }}"
+        }
+    }
+    </script>
+
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-brand-dark text-neutral-200 font-sans min-h-screen flex flex-col selection:bg-brand-orange selection:text-white overflow-x-hidden">
-    
-    <!-- Dynamic Glowing Backdrop Particles -->
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div class="absolute top-[20%] left-[10%] w-[35vw] h-[35vw] bg-brand-orange/5 rounded-full filter blur-[120px] animate-pulse"></div>
-        <div class="absolute bottom-[20%] right-[10%] w-[45vw] h-[45vw] bg-brand-gold/3 rounded-full filter blur-[150px] animate-pulse" style="animation-duration: 8s;"></div>
+<body class="min-h-screen flex flex-col overflow-x-hidden {% block body_class %}{% endblock %}">
+
+    <!-- Ambient background -->
+    <div class="bb-ambient" aria-hidden="true">
+        <div class="bb-ambient__blob bb-ambient__blob--1"></div>
+        <div class="bb-ambient__blob bb-ambient__blob--2"></div>
+        <div class="bb-ambient__blob bb-ambient__blob--3"></div>
+        <div class="bb-ambient__grain"></div>
     </div>
+    <div class="bb-spotlight" aria-hidden="true"></div>
 
     <!-- Navbar -->
-    <nav class="sticky top-0 z-50 w-full backdrop-blur-md bg-brand-dark/85 border-b border-white/5 py-4 shadow-glass transition-all duration-300" id="navbar">
-        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center relative">
-            
-            <!-- Logo -->
-            <a href="{{ url_for('main.home') }}" class="flex items-center gap-2 text-2xl font-display font-black text-white hover:scale-[1.02] active:scale-[0.98] transition-all">
-                <i class="bi bi-fire text-brand-orange animate-bounce"></i> 
-                Bite<span class="text-brand-orange">Buddy</span>
-            </a>
-            
-            <!-- Search Form -->
-            <div class="flex-1 max-w-sm mx-8 hidden lg:block">
-                <form action="{{ url_for('menu.search') }}" method="GET" class="relative flex items-center bg-white/5 border border-white/10 hover:border-white/20 focus-within:border-brand-orange/50 rounded-full px-4 py-2 shadow-inner-glass transition-all w-full">
-                    <input type="text" name="q" placeholder="Search delicious bites..." value="{{ request.args.get('q', '') }}" class="bg-transparent text-sm text-white placeholder-neutral-500 focus:outline-none w-full pr-8">
-                    <button type="submit" class="absolute right-3 text-neutral-400 hover:text-brand-orange transition-all"><i class="bi bi-search"></i></button>
-                </form>
-            </div>
-            
-            <!-- Nav Links -->
-            <div class="hidden md:flex items-center gap-8 text-sm font-semibold" id="nav-links">
-                <a href="{{ url_for('main.home') }}" class="nav-link text-neutral-300 hover:text-brand-orange flex items-center gap-2 transition-all"><i class="bi bi-house-fill"></i> Home</a>
+    <header class="bb-nav" id="bb-nav">
+        <div class="bb-nav__inner max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
+            {{ ui.logo() }}
+
+            <form action="{{ url_for('menu.search') }}" method="GET" class="bb-search hidden lg:flex max-w-xs" role="search">
+                <i class="bi bi-search"></i>
+                <input type="search" name="q" placeholder="Search burgers, pizza, shakes…" value="{{ request.args.get('q', '') }}" aria-label="Search the menu">
+            </form>
+
+            <nav class="hidden md:flex items-center gap-1" aria-label="Main">
+                <a href="{{ url_for('main.home') }}" class="bb-nav__link {% if ep == 'main.home' %}is-active{% endif %}"><i class="bi bi-house-door-fill"></i> Home</a>
                 {% if not current_user.is_authenticated or not current_user.is_admin %}
-                <a href="{{ url_for('menu.browse') }}" class="nav-link text-neutral-300 hover:text-brand-orange flex items-center gap-2 transition-all"><i class="bi bi-basket2-fill"></i> Menu</a>
+                <a href="{{ url_for('menu.browse') }}" class="bb-nav__link {% if ep.startswith('menu.') %}is-active{% endif %}"><i class="bi bi-grid-fill"></i> Menu</a>
                 {% endif %}
-                
                 {% if current_user.is_authenticated %}
                     {% if not current_user.is_admin %}
-                    <a href="{{ url_for('cart.view_cart') }}" class="nav-link text-neutral-300 hover:text-brand-orange flex items-center gap-2 transition-all relative">
-                        <i class="bi bi-cart-fill text-base"></i> Cart 
-                        <span class="bg-brand-orange text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-orange-glow transition-all" id="cart-badge">{{ current_user.cart_items | sum(attribute='quantity') }}</span>
+                    <a href="{{ url_for('orders.history') }}" class="bb-nav__link {% if ep.startswith('orders.') %}is-active{% endif %}"><i class="bi bi-receipt"></i> Orders</a>
+                    {% else %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="bb-nav__link {% if ep.startswith('admin.') %}is-active{% endif %}"><i class="bi bi-shield-lock-fill"></i> Admin</a>
+                    {% endif %}
+                {% else %}
+                <a href="{{ url_for('main.about') }}" class="bb-nav__link {% if ep == 'main.about' %}is-active{% endif %}"><i class="bi bi-stars"></i> About</a>
+                {% endif %}
+            </nav>
+
+            <div class="flex items-center gap-2">
+                {% if current_user.is_authenticated %}
+                    {% if not current_user.is_admin %}
+                    <a href="{{ url_for('cart.view_cart') }}" class="bb-btn bb-btn--icon relative js-cart-target" aria-label="Cart" title="Cart">
+                        <i class="bi bi-bag-fill"></i>
+                        <span class="bb-cart-badge absolute -top-1.5 -right-1.5 js-cart-count">{{ current_user.cart_items | sum(attribute='quantity') }}</span>
                     </a>
-                    <a href="{{ url_for('orders.history') }}" class="nav-link text-neutral-300 hover:text-brand-orange flex items-center gap-2 transition-all"><i class="bi bi-receipt"></i> Orders</a>
                     {% endif %}
-                    
-                    {% if current_user.is_admin %}
-                    <a href="{{ url_for('admin.dashboard') }}" class="nav-link text-brand-gold hover:text-yellow-400 flex items-center gap-2 transition-all"><i class="bi bi-shield-lock-fill"></i> Admin Panel</a>
-                    {% endif %}
-                    
-                    <!-- User Dropdown Menu -->
-                    <div class="nav-user-menu relative">
-                        <button class="nav-user-btn flex items-center gap-2 text-neutral-300 hover:text-brand-orange transition font-bold" id="nav-user-btn">
-                            <i class="bi bi-person-circle text-lg text-brand-orange"></i> {{ current_user.username }} <i class="bi bi-chevron-down text-xs"></i>
+                    <div class="relative hidden md:block">
+                        <button type="button" class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-white/10 hover:border-white/20 bg-white/5 transition" id="bb-user-btn" aria-haspopup="true" aria-expanded="false">
+                            <span class="w-8 h-8 rounded-full grid place-items-center font-display font-black text-sm text-white" style="background: var(--bb-grad)">{{ current_user.username[:1]|upper }}</span>
+                            <span class="text-sm font-semibold text-white max-w-[110px] truncate">{{ current_user.username }}</span>
+                            <i class="bi bi-chevron-down text-[10px] text-neutral-400"></i>
                         </button>
-                        <div class="nav-dropdown absolute right-0 mt-3 w-48 bg-brand-charcoal border border-white/10 rounded-2xl py-2 shadow-2xl backdrop-blur-xl hidden flex-col z-50 overflow-hidden" id="nav-dropdown">
-                            <a href="{{ url_for('auth.profile') }}" class="px-4 py-2.5 text-sm text-neutral-300 hover:bg-white/5 hover:text-brand-orange transition-all flex items-center gap-2"><i class="bi bi-person-fill"></i> Profile</a>
-                            <a href="{{ url_for('orders.history') }}" class="px-4 py-2.5 text-sm text-neutral-300 hover:bg-white/5 hover:text-brand-orange transition-all flex items-center gap-2"><i class="bi bi-box-seam"></i> My Orders</a>
-                            <hr class="border-white/5 my-1">
-                            <a href="{{ url_for('auth.logout') }}" class="px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all flex items-center gap-2"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                        <div class="bb-dropdown" id="bb-user-menu" role="menu">
+                            <div class="px-3 py-2 mb-1 border-b border-white/5">
+                                <p class="text-xs text-neutral-500">Signed in as</p>
+                                <p class="text-sm font-bold text-white truncate">{{ current_user.email }}</p>
+                            </div>
+                            <a href="{{ url_for('auth.profile') }}" role="menuitem"><i class="bi bi-person-fill"></i> Profile</a>
+                            {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin.dashboard') }}" role="menuitem"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                            {% else %}
+                            <a href="{{ url_for('orders.history') }}" role="menuitem"><i class="bi bi-box-seam"></i> My orders</a>
+                            {% endif %}
+                            <a href="{{ url_for('auth.logout') }}" class="is-danger" role="menuitem"><i class="bi bi-box-arrow-right"></i> Sign out</a>
                         </div>
                     </div>
                 {% else %}
-                <a href="{{ url_for('auth.login') }}" class="nav-link text-neutral-300 hover:text-brand-orange flex items-center gap-2 transition-all"><i class="bi bi-box-arrow-in-right"></i> Login</a>
-                <a href="{{ url_for('auth.register') }}" class="bg-gradient-to-r from-brand-orange to-brand-accent hover:from-brand-accent hover:to-brand-orange text-white px-5 py-2.5 rounded-full font-bold shadow-orange-glow hover:shadow-[0_0_25px_rgba(255,107,53,0.55)] scale-100 hover:scale-[1.03] active:scale-[0.97] transition-all flex items-center gap-2"><i class="bi bi-person-fill-plus"></i> Sign Up</a>
+                    <a href="{{ url_for('auth.login') }}" class="bb-nav__link hidden sm:inline-flex {% if ep == 'auth.login' %}is-active{% endif %}">Sign in</a>
+                    <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--primary bb-btn--sm hidden sm:inline-flex" data-magnetic><i class="bi bi-person-plus-fill"></i> Join free</a>
                 {% endif %}
+                <button type="button" class="bb-btn bb-btn--icon md:hidden" id="bb-drawer-open" aria-label="Open menu" aria-controls="bb-drawer" aria-expanded="false">
+                    <i class="bi bi-list text-xl"></i>
+                </button>
             </div>
-            
-            <!-- Mobile Toggle Button -->
-            <button class="nav-toggle md:hidden text-white text-2xl hover:text-brand-orange transition-all focus:outline-none" id="nav-toggle">
-                <i class="bi bi-list"></i>
-            </button>
         </div>
-    </nav>
+    </header>
 
-    <!-- Flash Messages (Beautiful Floating Toast notifications) -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="flash-container fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full px-6 md:px-0">
-        {% for category, message in messages %}
-        <div class="flash-message bg-brand-charcoal/95 border border-white/10 text-white rounded-2xl p-4 shadow-glass backdrop-blur-md flex items-start gap-3 justify-between animate-[slideIn_0.3s_ease-out_forwards]" data-category="{{ category }}">
-            <div class="flex items-center gap-3">
-                {% if category == 'success' %}
-                <i class="bi bi-check-circle-fill text-emerald-500 text-lg"></i>
-                {% elif category == 'error' or category == 'danger' %}
-                <i class="bi bi-exclamation-triangle-fill text-brand-red text-lg"></i>
+    <!-- Mobile drawer -->
+    <div class="bb-drawer-backdrop" data-drawer-close></div>
+    <aside class="bb-drawer" id="bb-drawer" aria-label="Mobile menu">
+        <div class="flex items-center justify-between">
+            {{ ui.logo() }}
+            <button type="button" class="bb-btn bb-btn--icon" data-drawer-close aria-label="Close menu"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <form action="{{ url_for('menu.search') }}" method="GET" class="bb-search" role="search">
+            <i class="bi bi-search"></i>
+            <input type="search" name="q" placeholder="Search the menu…" value="{{ request.args.get('q', '') }}" aria-label="Search the menu">
+        </form>
+        <nav class="flex flex-col gap-2">
+            <a href="{{ url_for('main.home') }}" class="bb-drawer__link {% if ep == 'main.home' %}is-active{% endif %}"><i class="bi bi-house-door-fill"></i> Home</a>
+            <a href="{{ url_for('menu.browse') }}" class="bb-drawer__link {% if ep.startswith('menu.') %}is-active{% endif %}"><i class="bi bi-grid-fill"></i> Menu</a>
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.dashboard') }}" class="bb-drawer__link {% if ep.startswith('admin.') %}is-active{% endif %}"><i class="bi bi-shield-lock-fill"></i> Admin panel</a>
                 {% else %}
-                <i class="bi bi-info-circle-fill text-brand-gold text-lg"></i>
+                <a href="{{ url_for('cart.view_cart') }}" class="bb-drawer__link {% if ep.startswith('cart.') %}is-active{% endif %}"><i class="bi bi-bag-fill"></i> Cart <span class="bb-cart-badge ml-auto js-cart-count">{{ current_user.cart_items | sum(attribute='quantity') }}</span></a>
+                <a href="{{ url_for('orders.history') }}" class="bb-drawer__link {% if ep.startswith('orders.') %}is-active{% endif %}"><i class="bi bi-receipt"></i> My orders</a>
                 {% endif %}
-                <span class="text-sm font-medium leading-relaxed">{{ message|safe }}</span>
-            </div>
-            <button class="text-neutral-400 hover:text-white transition-all focus:outline-none" onclick="this.parentElement.remove()"><i class="bi bi-x-lg text-xs"></i></button>
+                <a href="{{ url_for('auth.profile') }}" class="bb-drawer__link {% if ep == 'auth.profile' %}is-active{% endif %}"><i class="bi bi-person-fill"></i> Profile</a>
+            {% endif %}
+            <a href="{{ url_for('main.about') }}" class="bb-drawer__link {% if ep == 'main.about' %}is-active{% endif %}"><i class="bi bi-stars"></i> About</a>
+        </nav>
+        <div class="mt-auto flex flex-col gap-2">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('auth.logout') }}" class="bb-btn bb-btn--danger bb-btn--block"><i class="bi bi-box-arrow-right"></i> Sign out</a>
+            {% else %}
+            <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--primary bb-btn--block"><i class="bi bi-person-plus-fill"></i> Create account</a>
+            <a href="{{ url_for('auth.login') }}" class="bb-btn bb-btn--ghost bb-btn--block">Sign in</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Toasts -->
+    <div class="bb-toasts" id="bb-toasts" aria-live="polite">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="bb-toast bb-toast--{{ category }}" role="status" style="--life: 6s">
+            <span class="bb-toast__icon">
+                {% if category == 'success' %}<i class="bi bi-check-circle-fill"></i>
+                {% elif category in ['error', 'danger'] %}<i class="bi bi-exclamation-octagon-fill"></i>
+                {% else %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+            </span>
+            <div class="bb-toast__msg">{{ message|safe }}</div>
+            <button type="button" class="bb-toast__close" aria-label="Dismiss"><i class="bi bi-x-lg text-xs"></i></button>
+            <span class="bb-toast__bar"></span>
         </div>
         {% endfor %}
+        {% endwith %}
     </div>
-    {% endif %}
-    {% endwith %}
 
-    <!-- Main Content Area -->
-    <main class="main-content flex-1 max-w-7xl w-full mx-auto px-6 py-8 relative z-10">
+    <!-- Page -->
+    <main class="relative z-[2] flex-1 w-full bb-page-enter {% block main_class %}max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-10{% endblock %}">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-brand-charcoal/70 border-t border-white/5 py-12 px-6 mt-auto relative z-10 backdrop-blur-md shadow-glass">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
-                <!-- Brand Info -->
-                <div class="flex flex-col gap-4">
-                    <a href="{{ url_for('main.home') }}" class="flex items-center gap-2 text-2xl font-display font-black text-white">
-                        <i class="bi bi-fire text-brand-orange"></i> Bite<span class="text-brand-orange">Buddy</span>
-                    </a>
-                    <p class="text-neutral-400 text-sm max-w-xs leading-relaxed">Delivering premium, mouthwatering happiness, hot and fresh to your doorstep, one bite at a time.</p>
-                    <div class="flex gap-4 mt-2">
-                        <a href="#" class="w-10 h-10 bg-white/5 border border-white/10 hover:border-brand-orange/40 text-neutral-400 hover:text-brand-orange rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-inner-glass"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="w-10 h-10 bg-white/5 border border-white/10 hover:border-brand-orange/40 text-neutral-400 hover:text-brand-orange rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-inner-glass"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="w-10 h-10 bg-white/5 border border-white/10 hover:border-brand-orange/40 text-neutral-400 hover:text-brand-orange rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-inner-glass"><i class="bi bi-twitter-x"></i></a>
+    <footer class="bb-footer mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
+                <div class="md:col-span-5 flex flex-col gap-5">
+                    {{ ui.logo() }}
+                    <p class="text-sm leading-relaxed text-neutral-400 max-w-sm">Hot, fresh, crafted-to-order food — from our kitchen to your door, tracked every step of the way.</p>
+                    <div class="flex gap-3">
+                        <a href="#" class="bb-social" aria-label="BiteBuddy on Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="bb-social" aria-label="BiteBuddy on Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="bb-social" aria-label="BiteBuddy on X"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="bb-social" aria-label="BiteBuddy on TikTok"><i class="bi bi-tiktok"></i></a>
                     </div>
                 </div>
-                
-                <!-- Quick Links -->
-                <div class="flex flex-col gap-4">
-                    <h4 class="text-white font-display font-bold text-lg border-b border-white/10 pb-2">Quick Links</h4>
-                    <ul class="flex flex-col gap-2.5 text-neutral-400 text-sm">
-                        <li><a href="{{ url_for('main.home') }}" class="hover:text-brand-orange transition-all"><i class="bi bi-chevron-right text-[10px] text-brand-orange mr-1"></i> Home</a></li>
-                        <li><a href="{{ url_for('menu.browse') }}" class="hover:text-brand-orange transition-all"><i class="bi bi-chevron-right text-[10px] text-brand-orange mr-1"></i> Menu</a></li>
-                        <li><a href="{{ url_for('main.about') }}" class="hover:text-brand-orange transition-all"><i class="bi bi-chevron-right text-[10px] text-brand-orange mr-1"></i> About Us</a></li>
+                <div class="md:col-span-3">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-widest mb-4">Explore</h4>
+                    <ul class="flex flex-col gap-3">
+                        <li><a class="bb-footer__link" href="{{ url_for('main.home') }}">Home</a></li>
+                        <li><a class="bb-footer__link" href="{{ url_for('menu.browse') }}">Full menu</a></li>
+                        <li><a class="bb-footer__link" href="{{ url_for('main.about') }}">About BiteBuddy</a></li>
+                        {% if current_user.is_authenticated and not current_user.is_admin %}
+                        <li><a class="bb-footer__link" href="{{ url_for('orders.history') }}">Track an order</a></li>
+                        {% endif %}
                     </ul>
                 </div>
-                
-                <!-- Contact Info -->
-                <div class="flex flex-col gap-4">
-                    <h4 class="text-white font-display font-bold text-lg border-b border-white/10 pb-2">Contact Us</h4>
-                    <ul class="flex flex-col gap-3 text-neutral-400 text-sm">
-                        <li class="flex items-center gap-3"><i class="bi bi-geo-alt-fill text-brand-orange text-base"></i> Islamabad, Pakistan</li>
-                        <li class="flex items-center gap-3"><i class="bi bi-telephone-fill text-brand-orange text-base"></i> +92 300 1234567</li>
-                        <li class="flex items-center gap-3"><i class="bi bi-envelope-fill text-brand-orange text-base"></i> support@bitebuddy.com</li>
+                <div class="md:col-span-4">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-widest mb-4">Get in touch</h4>
+                    <ul class="flex flex-col gap-3 text-sm text-neutral-400">
+                        <li class="flex items-center gap-3"><i class="bi bi-geo-alt-fill text-brand-orange"></i> Islamabad, Pakistan</li>
+                        <li class="flex items-center gap-3"><i class="bi bi-telephone-fill text-brand-orange"></i> +92 300 1234567</li>
+                        <li class="flex items-center gap-3"><i class="bi bi-envelope-fill text-brand-orange"></i> support@bitebuddy.com</li>
+                        <li class="flex items-center gap-3"><i class="bi bi-clock-fill text-brand-orange"></i> Open daily · 11am – 2am</li>
                     </ul>
                 </div>
             </div>
-            
-            <!-- Bottom Footer -->
-            <div class="border-t border-white/5 pt-6 text-center text-neutral-500 text-xs flex flex-col md:flex-row justify-between items-center gap-4">
-                <p>&copy; 2026 BiteBuddy. Crafted with passion & 3D magic.</p>
-                <div class="flex gap-6">
-                    <a href="#" class="hover:text-neutral-300 transition-all">Privacy Policy</a>
-                    <a href="#" class="hover:text-neutral-300 transition-all">Terms of Service</a>
-                </div>
+        </div>
+        <div class="bb-footer__word" aria-hidden="true">BiteBuddy</div>
+        <div class="border-t border-white/5">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row justify-between gap-2 text-xs text-neutral-500">
+                <p>&copy; {{ current_year }} BiteBuddy. All rights reserved.</p>
+                <p>Crafted with <i class="bi bi-heart-fill text-brand-orange"></i> and a little 3D magic.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Main JS entrypoint -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ asset('js/main.js') }}" defer></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
-

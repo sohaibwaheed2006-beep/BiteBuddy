@@ -1,16 +1,19 @@
 {% extends "admin/base_admin.html" %}
-{% block title %}Manage Orders - Admin{% endblock %}
+{% import "_macros.html" as ui with context %}
+{% block title %}Orders — BiteBuddy Admin{% endblock %}
 
 {% block admin_content %}
-<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-    <h1 class="text-2xl font-display font-black text-white flex items-center gap-3">
-        <i class="bi bi-receipt text-brand-orange"></i> Order Management
-    </h1>
-    <form method="GET">
-        <select name="status" class="form-control text-sm py-2 px-4 bg-brand-charcoal" onchange="this.form.submit()">
-            <option value="">All Orders</option>
-            {% for s in ['pending','confirmed','preparing','out_for_delivery','delivered','cancelled'] %}
-            <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s.replace('_',' ').title() }}</option>
+{% set statuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'] %}
+<div class="flex flex-wrap items-end justify-between gap-4 mb-8" data-reveal>
+    <div>
+        <span class="bb-eyebrow">Kitchen queue</span>
+        <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-2">Orders <span class="text-neutral-500 text-xl">({{ orders|length }})</span></h1>
+    </div>
+    <form method="GET" class="w-full sm:w-56">
+        <select name="status" class="bb-input !py-2.5" onchange="this.form.submit()" aria-label="Filter by status">
+            <option value="">All orders</option>
+            {% for s in statuses %}
+            <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s.replace('_', ' ').title() }}</option>
             {% endfor %}
         </select>
     </form>
@@ -18,54 +21,40 @@
 
 <div class="flex flex-col gap-4">
     {% for order in orders %}
-    <div class="card p-5 flex flex-col gap-4 border-l-2
-        {% if order.status == 'delivered' %}border-l-emerald-500
-        {% elif order.status == 'cancelled' %}border-l-red-500
-        {% elif order.status == 'pending' %}border-l-yellow-500
-        {% else %}border-l-blue-500{% endif %}">
-
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div>
-                <h3 class="font-display font-black text-white">
-                    Order #{{ order.id }}
-                    <span class="text-xs text-neutral-500 font-normal ml-2">{{ order.created_at.strftime('%b %d, %H:%M') }}</span>
-                </h3>
-                <p class="text-sm text-neutral-300 mt-0.5">{{ order.user.username }} &bull; {{ order.phone }}</p>
+    <article class="bb-card p-5 sm:p-6 flex flex-col gap-4" data-reveal>
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div class="min-w-0">
+                <h2 class="font-display font-black text-lg text-white flex items-center gap-3">
+                    <a href="{{ url_for('orders.track', order_id=order.id) }}" class="hover:text-brand-orange">Order #{{ order.id }}</a>
+                    {{ ui.status_badge(order) }}
+                </h2>
+                <p class="text-sm text-neutral-300 mt-1">{{ order.user.username }} · {{ order.phone }} · <span class="text-neutral-500">{{ order.created_at.strftime('%b %d, %H:%M') }}</span></p>
                 <p class="text-xs text-neutral-500 mt-0.5 line-clamp-1">{{ order.delivery_address }}</p>
             </div>
-            <div class="flex items-center gap-3 flex-shrink-0">
-                <span class="font-display font-black text-brand-orange">Rs. {{ "%.0f"|format(order.total_amount) }}</span>
-                <span class="text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full
-                    {% if order.status == 'delivered' %}bg-emerald-500/15 text-emerald-400
-                    {% elif order.status == 'cancelled' %}bg-red-500/15 text-red-400
-                    {% elif order.status == 'pending' %}bg-yellow-500/15 text-yellow-400
-                    {% else %}bg-blue-500/15 text-blue-400{% endif %}">
-                    {{ order.status_display }}
-                </span>
+            <div class="text-left sm:text-right flex-shrink-0">
+                <p class="bb-price text-2xl"><small>Rs.</small>{{ "%.0f"|format(order.total_amount) }}</p>
+                <p class="text-xs text-neutral-500">{{ 'Cash on delivery' if order.payment_method == 'cash' else 'Card' }}{% if order.payment and order.payment.status == 'completed' %} · paid{% endif %}</p>
             </div>
         </div>
 
-        <!-- Items -->
-        <div class="border-t border-white/5 pt-3 flex flex-col gap-1.5 text-xs text-neutral-400 max-h-24 overflow-y-auto">
-            {% for item in order.items %}
-            <span><strong class="text-brand-orange">{{ item.quantity }}×</strong> {{ item.menu_item.name }}{% if item.options %} <span class="text-neutral-500">({{ item.options }})</span>{% endif %}</span>
+        <div class="flex flex-wrap gap-2">
+            {% for oi in order.items %}
+            <span class="bb-chip !normal-case !tracking-normal !font-semibold"><b class="text-brand-orange">{{ oi.quantity }}×</b> {{ oi.menu_item.name }}{% if oi.options %} <span class="text-neutral-500">· {{ oi.options }}</span>{% endif %}</span>
             {% endfor %}
         </div>
 
-        <!-- Status Update -->
-        <div class="border-t border-white/5 pt-3">
-            <form action="{{ url_for('admin.update_order_status', order_id=order.id) }}" method="POST" class="flex gap-3 items-center">
-                <select name="status" class="form-control text-xs py-2 px-3 bg-brand-charcoal flex-1">
-                    {% for s in ['pending','confirmed','preparing','out_for_delivery','delivered','cancelled'] %}
-                    <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s.replace('_',' ').title() }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-primary text-xs px-4 py-2 flex-shrink-0">Update Status</button>
-            </form>
-        </div>
-    </div>
+        <form action="{{ url_for('admin.update_order_status', order_id=order.id) }}" method="POST" class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-dashed border-white/10" data-loading>
+            {{ ui.csrf() }}
+            <select name="status" class="bb-input !py-2.5 sm:max-w-xs" aria-label="Order status">
+                {% for s in statuses %}
+                <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s.replace('_', ' ').title() }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bb-btn bb-btn--primary bb-btn--sm"><i class="bi bi-arrow-repeat"></i> Update status</button>
+        </form>
+    </article>
     {% else %}
-    <div class="card py-16 text-center text-neutral-500">No orders found.</div>
+    <div class="bb-card py-16 text-center text-neutral-500" data-reveal>No orders {% if status_filter %}with status “{{ status_filter.replace('_', ' ') }}”{% endif %} yet.</div>
     {% endfor %}
 </div>
 {% endblock %}

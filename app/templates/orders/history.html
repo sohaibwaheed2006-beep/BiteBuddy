@@ -1,78 +1,66 @@
 {% extends "base.html" %}
-{% block title %}Order History - BiteBuddy{% endblock %}
+{% import "_macros.html" as ui with context %}
+
+{% block title %}My orders — BiteBuddy{% endblock %}
 
 {% block content %}
-<div class="mb-8 flex justify-between items-center border-b border-white/5 pb-4">
-    <h1 class="text-3xl font-display font-black text-white flex items-center gap-3">
-        <i class="bi bi-receipt text-brand-orange"></i> Order History
-    </h1>
-    {% if orders %}
-    <span class="text-xs text-neutral-400 font-semibold">{{ orders|length }} Order{% if orders|length != 1 %}s{% endif %}</span>
-    {% endif %}
+<div class="flex flex-wrap items-end justify-between gap-4 mb-10" data-reveal>
+    <div>
+        <span class="bb-eyebrow">Order history</span>
+        <h1 class="bb-section-title">Your <span class="bb-gradient-text">orders</span></h1>
+    </div>
+    {% if orders %}<span class="bb-chip">{{ orders|length }} order{{ 's' if orders|length != 1 }}</span>{% endif %}
 </div>
 
 {% if orders %}
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
     {% for order in orders %}
-    <div class="card flex flex-col p-5 gap-4 border-t-2
-        {% if order.status == 'delivered' %}border-t-emerald-500
-        {% elif order.status == 'cancelled' %}border-t-red-500
-        {% else %}border-t-brand-orange{% endif %}">
-
-        <!-- Header -->
-        <div class="flex justify-between items-start">
+    <article class="bb-card p-6 flex flex-col gap-5" data-tilt data-tilt-max="5" data-reveal style="--reveal-delay: {{ (loop.index0 % 3) * 0.07 }}s">
+        <div class="bb-glare"></div>
+        <div class="flex justify-between items-start gap-3">
             <div>
-                <h3 class="font-display font-black text-white text-base">Order #{{ order.id }}</h3>
-                <p class="text-xs text-neutral-500 mt-0.5">{{ order.created_at.strftime('%b %d, %Y · %I:%M %p') }}</p>
+                <h2 class="font-display font-black text-xl text-white">Order #{{ order.id }}</h2>
+                <p class="text-xs text-neutral-500 mt-1">{{ order.created_at.strftime('%b %d, %Y · %I:%M %p') }}</p>
             </div>
-            <span class="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full
-                {% if order.status == 'delivered' %}bg-emerald-500/15 text-emerald-400
-                {% elif order.status == 'cancelled' %}bg-red-500/15 text-red-400
-                {% elif order.status == 'preparing' %}bg-brand-orange/15 text-brand-orange
-                {% else %}bg-blue-500/15 text-blue-400{% endif %}">
-                {{ order.status_display }}
-            </span>
+            {{ ui.status_badge(order) }}
         </div>
 
-        <!-- Items List -->
-        <div class="flex-1 border-t border-white/5 pt-4">
-            <ul class="flex flex-col gap-1.5 text-sm text-neutral-300">
-                {% for item in order.items[:3] %}
-                <li class="flex items-center gap-2">
-                    <span class="text-brand-orange font-bold text-xs">{{ item.quantity }}×</span>
-                    <span class="line-clamp-1">{{ item.menu_item.name }}</span>
-                </li>
-                {% endfor %}
-                {% if order.items|length > 3 %}
-                <li class="text-xs text-neutral-500 italic pl-5">…and {{ order.items|length - 3 }} more item(s)</li>
-                {% endif %}
-            </ul>
+        <div class="flex -space-x-3">
+            {% for oi in order.items[:4] %}
+            <img src="{{ oi.menu_item.image_url }}" alt="{{ oi.menu_item.name }}" title="{{ oi.quantity }}× {{ oi.menu_item.name }}"
+                 class="w-12 h-12 rounded-full object-cover border-2 border-[#111117]" onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
+            {% endfor %}
+            {% if order.items|length > 4 %}
+            <span class="w-12 h-12 rounded-full grid place-items-center text-xs font-bold text-white bg-white/10 border-2 border-[#111117]">+{{ order.items|length - 4 }}</span>
+            {% endif %}
         </div>
 
-        <!-- Footer -->
-        <div class="flex justify-between items-center border-t border-white/5 pt-4">
-            <span class="font-display font-black text-brand-orange text-base">Rs. {{ "%.0f"|format(order.total_amount) }}</span>
-            <a href="{{ url_for('orders.track', order_id=order.id) }}" class="btn btn-primary btn-sm text-xs px-4 py-2">
-                <i class="bi bi-geo-alt-fill"></i> View Details
+        <ul class="flex flex-col gap-1.5 text-sm text-neutral-300 flex-1">
+            {% for oi in order.items[:3] %}
+            <li class="flex gap-2"><span class="text-brand-orange font-bold">{{ oi.quantity }}×</span><span class="line-clamp-1">{{ oi.menu_item.name }}</span></li>
+            {% endfor %}
+            {% if order.items|length > 3 %}<li class="text-xs text-neutral-500 pl-6">+ {{ order.items|length - 3 }} more</li>{% endif %}
+        </ul>
+
+        {% if order.status not in ['delivered', 'cancelled'] %}
+        <div class="h-1.5 rounded-full bg-white/5 overflow-hidden"><div class="h-full rounded-full" style="width: {{ order.status_percentage }}%; background: var(--bb-grad)"></div></div>
+        {% endif %}
+
+        <div class="flex items-center justify-between pt-4 border-t border-dashed border-white/10">
+            <span class="bb-price text-xl"><small>Rs.</small>{{ "%.0f"|format(order.total_amount) }}</span>
+            <a href="{{ url_for('orders.track', order_id=order.id) }}" class="bb-btn bb-btn--primary bb-btn--sm">
+                {% if order.status in ['delivered', 'cancelled'] %}<i class="bi bi-receipt"></i> Details{% else %}<i class="bi bi-geo-alt-fill"></i> Track{% endif %}
             </a>
         </div>
-    </div>
+    </article>
     {% endfor %}
 </div>
-
 {% else %}
-<!-- Empty State -->
-<div class="card py-20 px-6 text-center flex flex-col items-center gap-5 max-w-md mx-auto mt-8">
-    <div class="w-24 h-24 bg-neutral-900 border border-white/5 rounded-full flex items-center justify-center text-neutral-500 text-4xl">
-        <i class="bi bi-receipt"></i>
-    </div>
-    <div>
-        <h2 class="text-2xl font-display font-black text-white mb-2">No orders yet</h2>
-        <p class="text-sm text-neutral-400">When you place orders, they'll appear here.</p>
-    </div>
-    <a href="{{ url_for('menu.browse') }}" class="btn btn-primary shadow-orange-glow mt-2">
-        <i class="bi bi-basket2-fill"></i> Order Now
-    </a>
+<div class="bb-card py-20 px-6 text-center max-w-lg mx-auto" data-reveal="zoom">
+    <div class="text-7xl mb-6 inline-block" style="animation: bbFloat 5s ease-in-out infinite">🧾</div>
+    <h2 class="font-display font-black text-3xl text-white">No orders yet</h2>
+    <p class="text-neutral-400 mt-2 mb-8">When you place an order, you can track it live from here.</p>
+    <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg"><i class="bi bi-lightning-charge-fill"></i> Order something</a>
 </div>
 {% endif %}
 {% endblock %}

@@ -1,4 +1,4 @@
-"""Entry point for the Sohaib Restaurant application."""
+"""Entry point for the BiteBuddy application."""
 
 from app import create_app
 

@@ -1,43 +1,64 @@
 {% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
 
-{% block title %}Login - BiteBuddy{% endblock %}
+{% block title %}Sign in — BiteBuddy{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-center min-h-[60vh] py-10 select-none relative">
-    
-    <!-- Neon orange background glow -->
-    <div class="absolute w-80 h-80 bg-brand-orange/10 rounded-full filter blur-[80px] -z-10 animate-pulse"></div>
+<div class="max-w-6xl mx-auto">
+    <div class="bb-auth" data-reveal="zoom">
+        {% with headline='Welcome back,<br><span class="bb-gradient-text">hungry friend.</span>', sub='Your favourites, saved addresses and order history are right where you left them.' %}
+        {% include "auth/_stage.html" %}
+        {% endwith %}
 
-    <div class="form-container max-w-[450px]">
-        <div class="text-center mb-8">
-            <h2 class="text-3xl font-display font-black text-white mb-2">Welcome Back!</h2>
-            <p class="text-xs text-neutral-400">Sign in to continue to BiteBuddy</p>
-        </div>
-        
-        <form method="POST" action="{{ url_for('auth.login') }}" class="flex flex-col gap-5">
-            <div class="form-group">
-                <label for="email" class="flex items-center gap-2"><i class="bi bi-envelope-fill text-brand-orange"></i> Email Address</label>
-                <input type="email" id="email" name="email" class="form-control" required placeholder="you@example.com">
+        <div class="bb-auth__form">
+            <div class="mb-8">
+                <span class="bb-eyebrow">Sign in</span>
+                <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-3 tracking-tight">Good to see you again</h1>
+                <p class="text-sm text-neutral-400 mt-2">New here? <a href="{{ url_for('auth.register') }}" class="text-brand-orange font-bold hover:underline">Create a free account</a></p>
             </div>
-            
-            <div class="form-group">
-                <label for="password" class="flex items-center gap-2"><i class="bi bi-lock-fill text-brand-orange"></i> Password</label>
-                <input type="password" id="password" name="password" class="form-control" required placeholder="••••••••">
+
+            <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) if request.args.get('next') else url_for('auth.login') }}" class="flex flex-col gap-5" data-loading>
+                {{ ui.csrf() }}
+                <div>
+                    <label for="email" class="bb-label">Email address</label>
+                    <div class="bb-field">
+                        <i class="bi bi-envelope bb-field__icon"></i>
+                        <input type="email" id="email" name="email" class="bb-input" required autocomplete="email" autofocus
+                               value="{{ email|default('') }}" placeholder="you@example.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="bb-label">Password</label>
+                    <div class="bb-field">
+                        <i class="bi bi-lock bb-field__icon"></i>
+                        <input type="password" id="password" name="password" class="bb-input !pr-12" required autocomplete="current-password" placeholder="Your password">
+                        <button type="button" class="bb-field__action" data-toggle-password="password" aria-label="Show password"><i class="bi bi-eye"></i></button>
+                    </div>
+                </div>
+
+                <label class="bb-check">
+                    <input type="checkbox" name="remember" value="1">
+                    <span class="bb-check__box"></span>
+                    Keep me signed in
+                </label>
+
+                <button type="submit" class="bb-btn bb-btn--primary bb-btn--lg bb-btn--block mt-2">
+                    <i class="bi bi-box-arrow-in-right"></i> Sign in
+                </button>
+            </form>
+
+            <div class="flex items-center gap-4 my-8">
+                <div class="bb-divider flex-1"></div>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-neutral-500">or just browse</span>
+                <div class="bb-divider flex-1"></div>
             </div>
-            
-            <div class="flex items-center gap-2 mb-2">
-                <input type="checkbox" id="remember" name="remember" class="w-4 h-4 accent-brand-orange cursor-pointer">
-                <label for="remember" class="text-xs font-semibold text-neutral-300 cursor-pointer select-none">Remember me</label>
-            </div>
-            
-            <button type="submit" class="btn btn-primary w-full py-3.5 shadow-orange-glow text-base">
-                <i class="bi bi-box-arrow-in-right text-lg"></i> Sign In
-            </button>
-        </form>
-        
-        <div class="text-center mt-8 pt-6 border-t border-white/5 text-xs text-neutral-400">
-            <p>Don't have an account yet? <a href="{{ url_for('auth.register') }}" class="text-brand-orange hover:underline font-bold">Create one here</a></p>
+            <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--ghost bb-btn--block"><i class="bi bi-grid"></i> Look at the menu first</a>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ asset('js/food3d.js') }}"></script>
 {% endblock %}

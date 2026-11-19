@@ -1,127 +1,89 @@
 {% extends "base.html" %}
-{% block title %}Shopping Cart - BiteBuddy{% endblock %}
+{% import "_macros.html" as ui with context %}
+
+{% block title %}Your cart — BiteBuddy{% endblock %}
 
 {% block content %}
-<div class="mb-8">
-    <h1 class="text-3xl font-display font-black text-white flex items-center gap-3">
-        <i class="bi bi-cart-fill text-brand-orange"></i> Your Cart
-    </h1>
+<div class="mb-10" data-reveal>
+    <span class="bb-eyebrow">Your cart</span>
+    <h1 class="bb-section-title">Ready when <span class="bb-gradient-text">you are</span></h1>
 </div>
 
 {% if cart_items %}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 items-start">
 
-    <!-- Cart Items Table -->
-    <div class="lg:col-span-2 flex flex-col gap-4">
+    <div class="flex flex-col gap-4">
         {% for item in cart_items %}
-        <div class="card flex flex-col sm:flex-row items-center gap-5 p-5">
-            <!-- Item Image -->
+        {% set unit = item.menu_item.price + (item.options_total or 0) %}
+        <article class="bb-card p-4 sm:p-5 flex items-center gap-4 sm:gap-5" data-reveal style="--reveal-delay: {{ loop.index0 * 0.05 }}s">
             <a href="{{ url_for('menu.item_detail', item_id=item.menu_item.id) }}" class="flex-shrink-0">
-                <img src="{{ item.menu_item.image_url }}" alt="{{ item.menu_item.name }}"
-                     class="w-20 h-20 object-cover rounded-2xl border border-white/10"
-                     onerror="this.src='/static/images/default_food.jpg'">
+                <img src="{{ item.menu_item.image_url }}" alt="{{ item.menu_item.name }}" loading="lazy"
+                     class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl border border-white/10 shadow-lg"
+                     onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
             </a>
 
-            <!-- Item Info -->
             <div class="flex-1 min-w-0">
-                <a href="{{ url_for('menu.item_detail', item_id=item.menu_item.id) }}"
-                   class="font-bold text-white text-base hover:text-brand-orange transition-all line-clamp-1">
-                    {{ item.menu_item.name }}
-                </a>
-                {% if item.options %}
-                <p class="text-xs text-neutral-400 mt-1">{{ item.options }}</p>
-                {% endif %}
-                <p class="text-brand-orange font-display font-black text-sm mt-1">
-                    Rs. {{ "%.0f"|format(item.menu_item.price + (item.options_total or 0)) }} each
-                </p>
-            </div>
+                <a href="{{ url_for('menu.item_detail', item_id=item.menu_item.id) }}" class="font-display font-extrabold text-white text-lg hover:text-brand-orange transition line-clamp-1">{{ item.menu_item.name }}</a>
+                {% if item.options %}<p class="text-xs text-neutral-400 mt-0.5 line-clamp-1">{{ item.options }}</p>{% endif %}
+                <p class="text-xs text-neutral-500 mt-1">Rs. {{ "%.0f"|format(unit) }} each</p>
 
-            <!-- Quantity Update -->
-            <form action="{{ url_for('cart.update_cart', cart_item_id=item.id) }}" method="POST"
-                  class="flex items-center gap-2">
-                <div class="flex items-center border border-white/10 rounded-full overflow-hidden bg-brand-charcoal px-2 py-1">
-                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
-                           class="bg-transparent text-white w-12 text-center font-bold text-sm focus:outline-none">
+                <div class="flex items-center justify-between gap-3 mt-3">
+                    <form action="{{ url_for('cart.update_cart', cart_item_id=item.id) }}" method="POST">
+                        {{ ui.csrf() }}
+                        <div class="bb-qty bb-qty--sm">
+                            <button type="button" data-qty-step="-1" aria-label="Decrease quantity"><i class="bi bi-dash"></i></button>
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="0" max="50" aria-label="Quantity of {{ item.menu_item.name }}" onchange="this.form.requestSubmit()">
+                            <button type="button" data-qty-step="1" aria-label="Increase quantity"><i class="bi bi-plus"></i></button>
+                        </div>
+                    </form>
+                    <span class="bb-price text-lg"><small>Rs.</small>{{ "%.0f"|format(unit * item.quantity) }}</span>
                 </div>
-                <button type="submit"
-                        class="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-neutral-400 hover:text-brand-orange transition-all">
-                    <i class="bi bi-arrow-repeat text-xs"></i>
-                </button>
-            </form>
-
-            <!-- Subtotal -->
-            <div class="text-right flex-shrink-0">
-                <p class="font-display font-black text-brand-orange text-base">
-                    Rs. {{ "%.0f"|format((item.menu_item.price + (item.options_total or 0)) * item.quantity) }}
-                </p>
             </div>
 
-            <!-- Remove -->
-            <form action="{{ url_for('cart.remove_from_cart', cart_item_id=item.id) }}" method="POST">
-                <button type="submit"
-                        class="w-9 h-9 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 rounded-full text-red-400 hover:text-red-300 transition-all">
-                    <i class="bi bi-trash-fill text-xs"></i>
+            <form action="{{ url_for('cart.remove_from_cart', cart_item_id=item.id) }}" method="POST" class="self-start">
+                {{ ui.csrf() }}
+                <button type="submit" class="bb-btn bb-btn--icon !w-9 !h-9 hover:!text-red-300 hover:!bg-red-500/15" aria-label="Remove {{ item.menu_item.name }}" title="Remove">
+                    <i class="bi bi-x-lg text-sm"></i>
                 </button>
             </form>
-        </div>
+        </article>
         {% endfor %}
 
-        <!-- Bottom Actions -->
-        <div class="flex justify-between items-center mt-2">
-            <a href="{{ url_for('menu.browse') }}" class="btn btn-outline text-sm px-5 py-2.5">
-                <i class="bi bi-arrow-left"></i> Continue Shopping
-            </a>
-            <form action="{{ url_for('cart.clear_cart') }}" method="POST">
-                <button type="submit"
-                        class="btn text-sm px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-400 hover:text-red-300 transition-all rounded-full">
-                    <i class="bi bi-trash-fill"></i> Clear Cart
-                </button>
+        <div class="flex flex-wrap justify-between gap-3 mt-2">
+            <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--ghost bb-btn--sm"><i class="bi bi-arrow-left"></i> Keep browsing</a>
+            <form action="{{ url_for('cart.clear_cart') }}" method="POST" data-confirm="Remove everything from your cart?">
+                {{ ui.csrf() }}
+                <button type="submit" class="bb-btn bb-btn--danger bb-btn--sm"><i class="bi bi-trash3"></i> Clear cart</button>
             </form>
         </div>
     </div>
 
-    <!-- Order Summary -->
-    <div class="sticky top-24">
-        <div class="card p-6 flex flex-col gap-5">
-            <h3 class="text-lg font-display font-black text-white border-b border-white/5 pb-4">Order Summary</h3>
-
+    <aside class="lg:sticky lg:top-24" data-reveal="right">
+        <div class="bb-glass p-6 sm:p-7 flex flex-col gap-5">
+            <h2 class="font-display font-black text-xl text-white">Order summary</h2>
             <div class="flex flex-col gap-3 text-sm">
-                <div class="flex justify-between text-neutral-400">
-                    <span>Subtotal</span>
-                    <span class="text-white font-semibold">Rs. {{ "%.0f"|format(total) }}</span>
-                </div>
-                <div class="flex justify-between text-neutral-400">
-                    <span>Delivery Fee</span>
-                    <span class="text-white font-semibold">Rs. 100</span>
-                </div>
+                <div class="flex justify-between text-neutral-400"><span>Subtotal · {{ cart_items | sum(attribute='quantity') }} items</span><span class="text-white font-semibold">Rs. {{ "%.0f"|format(total) }}</span></div>
+                <div class="flex justify-between text-neutral-400"><span>Delivery</span><span class="text-white font-semibold">Rs. {{ delivery_fee }}</span></div>
             </div>
-
-            <div class="flex justify-between items-center border-t border-white/5 pt-4">
-                <span class="font-display font-bold text-white text-base">Total</span>
-                <span class="font-display font-black text-brand-orange text-xl">Rs. {{ "%.0f"|format(total + 100) }}</span>
+            <div class="bb-divider"></div>
+            <div class="flex justify-between items-end">
+                <span class="text-neutral-300 font-semibold">Total</span>
+                <span class="bb-price text-3xl"><small>Rs.</small>{{ "%.0f"|format(total + delivery_fee) }}</span>
             </div>
-
-            <a href="{{ url_for('orders.checkout') }}"
-               class="btn btn-primary py-3.5 text-base shadow-orange-glow mt-2">
-                <i class="bi bi-lock-fill"></i> Proceed to Checkout
+            <a href="{{ url_for('orders.checkout') }}" class="bb-btn bb-btn--primary bb-btn--lg bb-btn--block" data-magnetic>
+                <i class="bi bi-lock-fill"></i> Checkout
             </a>
+            <p class="text-xs text-neutral-500 text-center flex items-center justify-center gap-1.5"><i class="bi bi-shield-check text-emerald-400"></i> Cash on delivery or secure card payment</p>
         </div>
-    </div>
+    </aside>
 </div>
 
 {% else %}
-<!-- Empty Cart State -->
-<div class="card py-20 px-6 text-center flex flex-col items-center gap-5 max-w-md mx-auto mt-8">
-    <div class="w-24 h-24 bg-neutral-900 border border-white/5 rounded-full flex items-center justify-center text-neutral-500 text-4xl">
-        <i class="bi bi-cart-x"></i>
-    </div>
-    <div>
-        <h2 class="text-2xl font-display font-black text-white mb-2">Your cart is empty</h2>
-        <p class="text-sm text-neutral-400">Looks like you haven't added any delicious food yet!</p>
-    </div>
-    <a href="{{ url_for('menu.browse') }}" class="btn btn-primary shadow-orange-glow mt-2">
-        <i class="bi bi-basket2-fill"></i> Browse Menu
-    </a>
+<div class="bb-card py-20 px-6 text-center max-w-lg mx-auto" data-reveal="zoom">
+    <div class="text-7xl mb-6" style="animation: bbFloat 5s ease-in-out infinite; display:inline-block">🛍️</div>
+    <h2 class="font-display font-black text-3xl text-white">Your cart is empty</h2>
+    <p class="text-neutral-400 mt-2 mb-8">Nothing in here yet — let's find something delicious.</p>
+    <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg"><i class="bi bi-grid-fill"></i> Browse the menu</a>
 </div>
 {% endif %}
 {% endblock %}

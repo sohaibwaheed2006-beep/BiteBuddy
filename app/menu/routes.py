@@ -2,6 +2,7 @@
 
 from flask import Blueprint, render_template, request
 from sqlalchemy import or_
+from app import db
 from app.models import Category, MenuItem
 
 menu_bp = Blueprint('menu', __name__, url_prefix='/menu')
@@ -15,7 +16,7 @@ def browse():
 
     if category_id:
         items = MenuItem.query.filter_by(category_id=category_id, is_available=True).all()
-        active_category = Category.query.get(category_id)
+        active_category = db.session.get(Category, category_id)
     else:
         items = MenuItem.query.filter_by(is_available=True).all()
         active_category = None

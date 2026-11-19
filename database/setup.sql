@@ -1,10 +1,12 @@
 -- ================================================
--- Sohaib Restaurant Database Setup
--- Run this file to create the database and tables
+-- BiteBuddy Database Setup (MySQL)
+-- Run this file to create the database and tables.
+-- Note: the app also creates tables and seeds data
+-- automatically on first start (see app/__init__.py).
 -- ================================================
 
-CREATE DATABASE IF NOT EXISTS feastflow;
-USE feastflow;
+CREATE DATABASE IF NOT EXISTS bitebuddy;
+USE bitebuddy;
 
 -- Users Table
 CREATE TABLE IF NOT EXISTS users (
@@ -91,10 +93,13 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 -- ================================================
--- Seed Data: Admin User (password: admin123)
+-- Seed Data: Admin User
+-- The hash below is a placeholder and cannot be used to log in.
+-- Leave this row out and start the app instead: it creates the admin
+-- account with a real hash (password from the ADMIN_PASSWORD env var).
 -- ================================================
 INSERT INTO users (username, email, password_hash, phone, role) VALUES
-('admin', 'admin@sohaibrestaurant.com', 'scrypt:32768:8:1$placeholder$admin', '03001234567', 'admin');
+('admin', 'admin@bitebuddy.com', 'scrypt:32768:8:1$placeholder$admin', '03001234567', 'admin');
 
 -- ================================================
 -- Seed Data: Categories

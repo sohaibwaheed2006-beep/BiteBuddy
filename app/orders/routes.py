@@ -1,6 +1,6 @@
 """Order routes: Checkout, Order history, Order tracking."""
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, current_app, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app import db
 from app.models import CartItem, Order, OrderItem
@@ -24,6 +24,8 @@ def checkout():
         delivery_address = request.form.get('delivery_address', '').strip()
         phone = request.form.get('phone', '').strip()
         payment_method = request.form.get('payment_method', 'cash')
+        if payment_method not in ('cash', 'card'):
+            payment_method = 'cash'
 
         if not delivery_address:
             flash('Please enter a delivery address.', 'error')
@@ -36,10 +38,10 @@ def checkout():
                                    total=total, phone=phone,
                                    delivery_address=delivery_address)
 
-        # Create order
+        # Create order — the total charged includes the delivery fee shown at checkout
         order = Order(
             user_id=current_user.id,
-            total_amount=total,
+            total_amount=total + current_app.config['DELIVERY_FEE'],
             status='pending',
             payment_method=payment_method,
             delivery_address=delivery_address,

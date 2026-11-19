@@ -1,157 +1,113 @@
 {% extends "base.html" %}
-{% block title %}Track Order #{{ order.id }} - BiteBuddy{% endblock %}
+{% import "_macros.html" as ui with context %}
+
+{% block title %}Order #{{ order.id }} — BiteBuddy{% endblock %}
 
 {% block content %}
-<!-- Back Navigation -->
-<div class="mb-6">
-    <a href="{{ url_for('orders.history') }}" class="text-sm text-neutral-400 hover:text-brand-orange flex items-center gap-2 transition-all">
-        <i class="bi bi-arrow-left"></i> Back to Orders
-    </a>
-</div>
+{% set items_subtotal = order.items | sum(attribute='subtotal') %}
+{% set fee = order.total_amount - items_subtotal if order.total_amount > items_subtotal else 0 %}
+{% set steps = [
+    ('pending', 'bi-hourglass-split', 'Received', 10),
+    ('confirmed', 'bi-patch-check-fill', 'Confirmed', 25),
+    ('preparing', 'bi-fire', 'Cooking', 50),
+    ('out_for_delivery', 'bi-bicycle', 'On the way', 75),
+    ('delivered', 'bi-house-heart-fill', 'Delivered', 100),
+] %}
 
-<!-- Main Container -->
-<div class="max-w-3xl mx-auto">
-    <div class="card p-6 md:p-10 flex flex-col gap-8">
+<a href="{{ url_for('orders.history') if not current_user.is_admin else url_for('admin.manage_orders') }}" class="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition mb-6">
+    <i class="bi bi-arrow-left"></i> Back to orders
+</a>
 
-        <!-- Order Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/5 pb-6">
+<div class="max-w-4xl mx-auto flex flex-col gap-6">
+    <section class="bb-glass p-6 sm:p-10" data-reveal="zoom">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-display font-black text-white">Order #{{ order.id }}</h1>
-                <p class="text-sm text-neutral-400 mt-1">Placed on {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                <span class="bb-eyebrow">Live tracking</span>
+                <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-2">Order #{{ order.id }}</h1>
+                <p class="text-sm text-neutral-400 mt-1">Placed {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
             </div>
-            <span class="text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full
-                {% if order.status == 'delivered' %}bg-emerald-500/15 text-emerald-400 border border-emerald-500/20
-                {% elif order.status == 'cancelled' %}bg-red-500/15 text-red-400 border border-red-500/20
-                {% elif order.status == 'preparing' %}bg-brand-orange/15 text-brand-orange border border-brand-orange/20
-                {% else %}bg-blue-500/15 text-blue-400 border border-blue-500/20{% endif %}">
-                {{ order.status_display }}
-            </span>
+            {{ ui.status_badge(order) }}
         </div>
 
-        <!-- Live Tracking Stepper -->
         {% if order.status != 'cancelled' %}
-        <div class="flex flex-col gap-6">
-            <h3 class="text-lg font-display font-bold text-white text-center">Live Order Progress</h3>
-
-            <!-- Progress Bar -->
-            <div class="relative w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-orange to-brand-red rounded-full transition-all duration-1000"
-                     style="width: {{ order.status_percentage }}%;"></div>
+        <div class="bb-track mt-10" data-progress="{{ order.status_percentage }}">
+            <div class="bb-track__rail">
+                <div class="bb-track__fill"></div>
+                <div class="bb-track__rider" aria-hidden="true">{{ '🏠' if order.status == 'delivered' else '🛵' }}</div>
             </div>
-
-            <!-- Step Icons -->
-            <div class="grid grid-cols-5 gap-1 text-center">
-                {% set steps = [
-                    ('pending', 'bi-clock-fill', 'Pending', 10),
-                    ('confirmed', 'bi-patch-check-fill', 'Confirmed', 25),
-                    ('preparing', 'bi-fire', 'Preparing', 50),
-                    ('out_for_delivery', 'bi-bicycle', 'On The Way', 75),
-                    ('delivered', 'bi-box-seam', 'Delivered', 100)
-                ] %}
-                {% for step_status, icon, label, pct in steps %}
-                <div class="flex flex-col items-center gap-2">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all
-                        {% if order.status_percentage >= pct %}
-                            bg-brand-orange border-brand-orange text-white shadow-orange-glow
-                        {% else %}
-                            bg-white/5 border-white/10 text-neutral-500
-                        {% endif %}">
-                        <i class="bi {{ icon }} text-sm"></i>
-                    </div>
-                    <span class="text-[10px] font-bold {% if order.status_percentage >= pct %}text-white{% else %}text-neutral-500{% endif %} leading-tight">
-                        {{ label }}
-                    </span>
-                </div>
+            <ol class="bb-track__steps">
+                {% for key, icon, label, pct in steps %}
+                <li class="bb-track__step {% if order.status_percentage >= pct %}is-done{% endif %} {% if order.status == key %}is-current{% endif %}">
+                    <span class="bb-track__icon"><i class="bi {{ icon }}"></i></span>
+                    <span>{{ label }}</span>
+                </li>
                 {% endfor %}
-            </div>
+            </ol>
         </div>
+        {% if order.status not in ['delivered'] %}
+        <p class="text-xs text-neutral-500 text-center mt-8 flex items-center justify-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> This page refreshes automatically</p>
+        {% endif %}
         {% else %}
-        <!-- Cancelled State -->
-        <div class="flex flex-col items-center gap-4 py-6 bg-red-500/5 border border-red-500/15 rounded-2xl text-center">
-            <div class="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 text-2xl">
-                <i class="bi bi-x-circle-fill"></i>
-            </div>
-            <div>
-                <h3 class="text-lg font-bold text-red-400">Order Cancelled</h3>
-                <p class="text-sm text-neutral-400 mt-1">This order has been cancelled. Contact support for questions.</p>
-            </div>
+        <div class="mt-8 flex flex-col items-center gap-3 py-8 rounded-3xl bg-red-500/5 border border-red-500/15 text-center">
+            <i class="bi bi-x-octagon-fill text-4xl text-red-400"></i>
+            <h2 class="font-display font-black text-xl text-red-300">This order was cancelled</h2>
+            <p class="text-sm text-neutral-400">Questions? Reach us at support@bitebuddy.com.</p>
         </div>
         {% endif %}
+    </section>
 
-        <!-- Order Items & Delivery Info -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-white/5 pt-6">
+    <div class="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-6">
+        <section class="bb-card p-6 sm:p-7" data-reveal>
+            <h2 class="font-display font-black text-lg text-white mb-5 flex items-center gap-2"><i class="bi bi-bag-fill text-brand-orange"></i> Items</h2>
+            <ul class="flex flex-col gap-4">
+                {% for oi in order.items %}
+                <li class="flex items-center gap-3">
+                    <img src="{{ oi.menu_item.image_url }}" alt="" class="w-12 h-12 rounded-xl object-cover border border-white/10" onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-white font-semibold line-clamp-1"><span class="text-brand-orange">{{ oi.quantity }}×</span> {{ oi.menu_item.name }}</p>
+                        {% if oi.options %}<p class="text-xs text-neutral-500 line-clamp-1">{{ oi.options }}</p>{% endif %}
+                    </div>
+                    <span class="text-sm font-bold text-neutral-200">Rs. {{ "%.0f"|format(oi.subtotal) }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="bb-divider my-5"></div>
+            <div class="flex flex-col gap-2 text-sm">
+                <div class="flex justify-between text-neutral-400"><span>Subtotal</span><span class="text-white">Rs. {{ "%.0f"|format(items_subtotal) }}</span></div>
+                <div class="flex justify-between text-neutral-400"><span>Delivery</span><span class="text-white">Rs. {{ "%.0f"|format(fee) }}</span></div>
+                <div class="flex justify-between items-end mt-2"><span class="text-neutral-300 font-semibold">Total</span><span class="bb-price text-2xl"><small>Rs.</small>{{ "%.0f"|format(order.total_amount) }}</span></div>
+            </div>
+        </section>
 
-            <!-- Items -->
+        <section class="bb-card p-6 sm:p-7 flex flex-col gap-5" data-reveal style="--reveal-delay:.1s">
+            <h2 class="font-display font-black text-lg text-white flex items-center gap-2"><i class="bi bi-geo-alt-fill text-brand-orange"></i> Delivery</h2>
             <div>
-                <h3 class="font-display font-black text-white mb-4 flex items-center gap-2">
-                    <i class="bi bi-bag-fill text-brand-orange text-sm"></i> Order Items
-                </h3>
-                <ul class="flex flex-col gap-3">
-                    {% for item in order.items %}
-                    <li class="flex justify-between text-sm border-b border-white/5 pb-2">
-                        <div>
-                            <span class="text-brand-orange font-bold">{{ item.quantity }}×</span>
-                            <span class="text-neutral-200 ml-1">{{ item.menu_item.name }}</span>
-                        </div>
-                        <span class="text-neutral-300 font-semibold">Rs. {{ "%.0f"|format(item.subtotal) }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-                <div class="mt-4 flex flex-col gap-2 text-sm">
-                    <div class="flex justify-between text-neutral-400">
-                        <span>Subtotal</span><span class="text-white">Rs. {{ "%.0f"|format(order.total_amount - 100) }}</span>
-                    </div>
-                    <div class="flex justify-between text-neutral-400">
-                        <span>Delivery Fee</span><span class="text-white">Rs. 100</span>
-                    </div>
-                    <div class="flex justify-between border-t border-white/5 pt-2 mt-1 font-display font-black">
-                        <span class="text-white">Total</span>
-                        <span class="text-brand-orange">Rs. {{ "%.0f"|format(order.total_amount) }}</span>
-                    </div>
+                <p class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold mb-1">Address</p>
+                <p class="text-sm text-neutral-200 leading-relaxed">{{ order.delivery_address }}</p>
+            </div>
+            <div>
+                <p class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold mb-1">Phone</p>
+                <p class="text-sm text-neutral-200">{{ order.phone }}</p>
+            </div>
+            <div>
+                <p class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold mb-1">Payment</p>
+                <div class="flex items-center gap-2 text-sm text-neutral-200">
+                    {{ 'Cash on delivery' if order.payment_method == 'cash' else 'Card' }}
+                    {% if order.payment and order.payment.status == 'completed' %}
+                    <span class="bb-status bb-status--delivered">Paid</span>
+                    {% else %}
+                    <span class="bb-status bb-status--pending">Unpaid</span>
+                    {% endif %}
                 </div>
             </div>
-
-            <!-- Delivery Info -->
-            <div>
-                <h3 class="font-display font-black text-white mb-4 flex items-center gap-2">
-                    <i class="bi bi-geo-alt-fill text-brand-orange text-sm"></i> Delivery Info
-                </h3>
-                <div class="bg-white/5 border border-white/5 rounded-2xl p-4 flex flex-col gap-4 text-sm">
-                    <div>
-                        <p class="text-xs text-neutral-500 uppercase tracking-wider mb-1">Address</p>
-                        <p class="text-neutral-200">{{ order.delivery_address }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-neutral-500 uppercase tracking-wider mb-1">Phone</p>
-                        <p class="text-neutral-200">{{ order.phone }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-neutral-500 uppercase tracking-wider mb-1">Payment</p>
-                        <div class="flex items-center gap-2">
-                            <span class="text-neutral-200 capitalize">{{ order.payment_method }}</span>
-                            {% if order.payment and order.payment.status == 'completed' %}
-                            <span class="text-[10px] font-black px-2 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full"><i class="bi bi-check-lg"></i> Paid</span>
-                            {% else %}
-                            <span class="text-[10px] font-black px-2 py-0.5 bg-yellow-500/15 text-yellow-400 rounded-full">Pending</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                {% if not order.payment and order.payment_method == 'card' and order.status != 'cancelled' %}
-                <a href="{{ url_for('payment.pay', order_id=order.id) }}" class="btn btn-primary w-full mt-4 shadow-orange-glow">
-                    <i class="bi bi-credit-card-fill"></i> Pay Now
-                </a>
-                {% endif %}
-            </div>
-        </div>
+            {% if not order.payment and order.payment_method == 'card' and order.status != 'cancelled' and order.user_id == current_user.id %}
+            <a href="{{ url_for('payment.pay', order_id=order.id) }}" class="bb-btn bb-btn--primary bb-btn--block mt-auto"><i class="bi bi-credit-card-fill"></i> Pay now</a>
+            {% endif %}
+        </section>
     </div>
 </div>
 
 {% if order.status not in ['delivered', 'cancelled'] %}
-<script>
-    // Auto-refresh every 30s for live tracking
-    setTimeout(() => location.reload(), 30000);
-</script>
+<script>setTimeout(() => location.reload(), 30000);</script>
 {% endif %}
 {% endblock %}

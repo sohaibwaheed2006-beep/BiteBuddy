@@ -1,62 +1,93 @@
 {% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
 
-{% block title %}Register - BiteBuddy{% endblock %}
+{% block title %}Create account — BiteBuddy{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-center min-h-[70vh] py-10 select-none relative">
-    
-    <!-- Neon orange background glow -->
-    <div class="absolute w-96 h-96 bg-brand-orange/10 rounded-full filter blur-[100px] -z-10 animate-pulse"></div>
+<div class="max-w-6xl mx-auto">
+    <div class="bb-auth" data-reveal="zoom">
+        {% with headline='Your table is<br><span class="bb-gradient-text">always ready.</span>', sub='Join BiteBuddy to order in seconds, save your delivery address and follow every order live.' %}
+        {% include "auth/_stage.html" %}
+        {% endwith %}
 
-    <div class="form-container max-w-[650px]">
-        <div class="text-center mb-8">
-            <h2 class="text-3xl font-display font-black text-white mb-2">Join BiteBuddy</h2>
-            <p class="text-xs text-neutral-400">Create an account to start ordering delicious hot food!</p>
-        </div>
-        
-        <form method="POST" action="{{ url_for('auth.register') }}" class="flex flex-col gap-5">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div class="form-group">
-                    <label for="username" class="flex items-center gap-2"><i class="bi bi-person-fill text-brand-orange"></i> Username</label>
-                    <input type="text" id="username" name="username" class="form-control" required value="{{ username|default('') }}" placeholder="SohaibWaheed">
-                </div>
-                
-                <div class="form-group">
-                    <label for="phone" class="flex items-center gap-2"><i class="bi bi-telephone-fill text-brand-orange"></i> Phone Number</label>
-                    <input type="text" id="phone" name="phone" class="form-control" required value="{{ phone|default('') }}" placeholder="e.g. 03001234567">
-                </div>
+        <div class="bb-auth__form">
+            <div class="mb-7">
+                <span class="bb-eyebrow">Create account</span>
+                <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-3 tracking-tight">Join BiteBuddy</h1>
+                <p class="text-sm text-neutral-400 mt-2">Already a member? <a href="{{ url_for('auth.login') }}" class="text-brand-orange font-bold hover:underline">Sign in</a></p>
             </div>
-            
-            <div class="form-group">
-                <label for="email" class="flex items-center gap-2"><i class="bi bi-envelope-fill text-brand-orange"></i> Email Address</label>
-                <input type="email" id="email" name="email" class="form-control" required value="{{ email|default('') }}" placeholder="you@example.com">
-            </div>
-            
-            <div class="form-group">
-                <label for="address" class="flex items-center gap-2"><i class="bi bi-geo-alt-fill text-brand-orange"></i> Delivery Address <span class="text-[10px] text-neutral-500 font-semibold">(Optional)</span></label>
-                <textarea id="address" name="address" class="form-control" rows="2" placeholder="Enter your full street address...">{{ address|default('') }}</textarea>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div class="form-group">
-                    <label for="password" class="flex items-center gap-2"><i class="bi bi-lock-fill text-brand-orange"></i> Password</label>
-                    <input type="password" id="password" name="password" class="form-control" required minlength="6" placeholder="At least 6 characters">
+
+            <form method="POST" action="{{ url_for('auth.register') }}" class="flex flex-col gap-4" data-loading>
+                {{ ui.csrf() }}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="username" class="bb-label">Username</label>
+                        <div class="bb-field">
+                            <i class="bi bi-person bb-field__icon"></i>
+                            <input type="text" id="username" name="username" class="bb-input" required minlength="3" maxlength="80" autocomplete="username"
+                                   value="{{ username|default('') }}" placeholder="e.g. foodlover">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="phone" class="bb-label">Phone</label>
+                        <div class="bb-field">
+                            <i class="bi bi-telephone bb-field__icon"></i>
+                            <input type="tel" id="phone" name="phone" class="bb-input" required autocomplete="tel" maxlength="20"
+                                   value="{{ phone|default('') }}" placeholder="03001234567">
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="confirm_password" class="flex items-center gap-2"><i class="bi bi-shield-lock-fill text-brand-orange"></i> Confirm Password</label>
-                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" required minlength="6" placeholder="Confirm your password">
+
+                <div>
+                    <label for="email" class="bb-label">Email address</label>
+                    <div class="bb-field">
+                        <i class="bi bi-envelope bb-field__icon"></i>
+                        <input type="email" id="email" name="email" class="bb-input" required autocomplete="email"
+                               value="{{ email|default('') }}" placeholder="you@example.com">
+                    </div>
                 </div>
-            </div>
-            
-            <button type="submit" class="btn btn-primary w-full py-3.5 shadow-orange-glow text-base mt-2">
-                <i class="bi bi-person-fill-plus text-lg"></i> Create Account
-            </button>
-        </form>
-        
-        <div class="text-center mt-8 pt-6 border-t border-white/5 text-xs text-neutral-400">
-            <p>Already have an account? <a href="{{ url_for('auth.login') }}" class="text-brand-orange hover:underline font-bold">Log in here</a></p>
+
+                <div>
+                    <label for="address" class="bb-label">Delivery address <span class="text-neutral-500 font-medium">(optional)</span></label>
+                    <div class="bb-field bb-field--textarea">
+                        <i class="bi bi-geo-alt bb-field__icon"></i>
+                        <textarea id="address" name="address" class="bb-input" rows="2" autocomplete="street-address" placeholder="House, street, area, city">{{ address|default('') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="password" class="bb-label">Password</label>
+                        <div class="bb-field">
+                            <i class="bi bi-lock bb-field__icon"></i>
+                            <input type="password" id="password" name="password" class="bb-input !pr-12" required minlength="6" autocomplete="new-password" placeholder="6+ characters">
+                            <button type="button" class="bb-field__action" data-toggle-password="password" aria-label="Show password"><i class="bi bi-eye"></i></button>
+                        </div>
+                        <div class="bb-strength" data-strength-for="password" data-strength-label="strength-label" data-level="0" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+                        <p class="bb-hint" id="strength-label" aria-live="polite"></p>
+                    </div>
+                    <div>
+                        <label for="confirm_password" class="bb-label">Confirm password</label>
+                        <div class="bb-field">
+                            <i class="bi bi-shield-lock bb-field__icon"></i>
+                            <input type="password" id="confirm_password" name="confirm_password" class="bb-input !pr-12" required minlength="6" autocomplete="new-password"
+                                   placeholder="Type it again" data-match-for="password" data-match-hint="match-hint">
+                            <button type="button" class="bb-field__action" data-toggle-password="confirm_password" aria-label="Show password"><i class="bi bi-eye"></i></button>
+                        </div>
+                        <p class="bb-hint" id="match-hint" aria-live="polite"></p>
+                    </div>
+                </div>
+
+                <button type="submit" class="bb-btn bb-btn--primary bb-btn--lg bb-btn--block mt-3">
+                    <i class="bi bi-stars"></i> Create my account
+                </button>
+                <p class="text-xs text-neutral-500 text-center">By joining you agree to receive order updates by email and SMS.</p>
+            </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ asset('js/food3d.js') }}"></script>
 {% endblock %}

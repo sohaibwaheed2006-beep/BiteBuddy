@@ -10,9 +10,10 @@ main_bp = Blueprint('main', __name__)
 def home():
     """Landing / home page."""
     categories = Category.query.all()
-    popular_items = MenuItem.query.filter_by(is_available=True).limit(8).all()
+    available = MenuItem.query.filter_by(is_available=True)
+    popular_items = available.limit(8).all()
     return render_template('main/home.html', categories=categories,
-                           popular_items=popular_items)
+                           popular_items=popular_items, item_count=available.count())
 
 
 @main_bp.route('/about')
@@ -24,7 +25,7 @@ def about():
 @main_bp.route('/favicon.ico')
 @main_bp.route('/favicon.png')
 def favicon():
-    """Serve the green favicon from the static directory."""
+    """Serve the BiteBuddy favicon from the static directory."""
     import os
     from flask import send_from_directory, current_app
     return send_from_directory(
