@@ -22,6 +22,14 @@ def about():
     return render_template('main/about.html')
 
 
+@main_bp.route('/robots.txt')
+def robots():
+    """Keep crawlers out of private areas."""
+    from flask import Response
+    body = 'User-agent: *\nDisallow: /admin/\nDisallow: /cart/\nDisallow: /orders/\nDisallow: /payment/\nAllow: /\n'
+    return Response(body, mimetype='text/plain')
+
+
 @main_bp.route('/favicon.ico')
 @main_bp.route('/favicon.png')
 def favicon():

@@ -1,5 +1,6 @@
 """BiteBuddy application factory."""
 
+import hashlib
 import os
 from datetime import datetime, timezone
 
@@ -52,13 +53,23 @@ def create_app(config_name='default'):
 def _register_template_helpers(app):
     """Values and helpers available in every template."""
     static_dir = os.path.join(app.root_path, 'static')
+    versions = {}
 
     def asset(filename):
-        """Static URL with a ?v=<mtime> cache-buster so browsers pick up new deploys."""
+        """Static URL with a ?v=<content hash> cache-buster so browsers pick up new deploys.
+
+        A content hash (not mtime) is used because Vercel resets file timestamps on deploy.
+        """
+        path = os.path.join(static_dir, filename)
         try:
-            version = int(os.path.getmtime(os.path.join(static_dir, filename)))
+            stamp = os.path.getmtime(path)
+            cached_ver = versions.get(filename)
+            if not cached_ver or cached_ver[0] != stamp:
+                with open(path, 'rb') as fh:
+                    versions[filename] = (stamp, hashlib.md5(fh.read()).hexdigest()[:10])
+            version = versions[filename][1]
         except OSError:
-            version = 0
+            version = '0'
         return url_for('static', filename=filename, v=version)
 
     @app.context_processor
