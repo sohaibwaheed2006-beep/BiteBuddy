@@ -14,8 +14,8 @@
         {{ ui.csrf() }}
 
         <section class="flex flex-col gap-5">
-            <h2 class="flex items-center gap-3 font-display font-black text-xl text-white">
-                <span class="w-9 h-9 rounded-xl grid place-items-center text-sm" style="background: var(--bb-grad)">1</span> Delivery details
+            <h2 class="flex items-center gap-3 font-display font-extrabold text-xl text-ink">
+                <span class="w-9 h-9 rounded-xl grid place-items-center text-sm text-white" style="background: var(--bb-grad)">1</span> Delivery details
             </h2>
             <div>
                 <label for="phone" class="bb-label">Phone number</label>
@@ -36,19 +36,19 @@
         </section>
 
         <section class="flex flex-col gap-5">
-            <h2 class="flex items-center gap-3 font-display font-black text-xl text-white">
-                <span class="w-9 h-9 rounded-xl grid place-items-center text-sm" style="background: var(--bb-grad)">2</span> Payment
+            <h2 class="flex items-center gap-3 font-display font-extrabold text-xl text-ink">
+                <span class="w-9 h-9 rounded-xl grid place-items-center text-sm text-white" style="background: var(--bb-grad)">2</span> Payment
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label class="bb-option">
                     <input type="radio" name="payment_method" value="cash" checked>
                     <span class="bb-option__dot"></span>
-                    <span class="flex flex-col"><b class="text-white text-sm flex items-center gap-2"><i class="bi bi-cash-stack text-brand-yellow"></i> Cash on delivery</b><span class="text-xs text-neutral-500">Pay when it arrives</span></span>
+                    <span class="flex flex-col"><b class="text-ink text-sm flex items-center gap-2"><i class="bi bi-cash-stack text-brand-yellow"></i> Cash on delivery</b><span class="text-xs text-stone-500">Pay when it arrives</span></span>
                 </label>
                 <label class="bb-option">
                     <input type="radio" name="payment_method" value="card">
                     <span class="bb-option__dot"></span>
-                    <span class="flex flex-col"><b class="text-white text-sm flex items-center gap-2"><i class="bi bi-credit-card-2-front text-brand-orange"></i> Card</b><span class="text-xs text-neutral-500">Secure online payment</span></span>
+                    <span class="flex flex-col"><b class="text-ink text-sm flex items-center gap-2"><i class="bi bi-credit-card-2-front text-brand-orange"></i> Card</b><span class="text-xs text-stone-500">Secure online payment</span></span>
                 </label>
             </div>
         </section>
@@ -61,31 +61,31 @@
     <aside class="lg:sticky lg:top-24" data-reveal="right">
         <div class="bb-card p-6 flex flex-col gap-5">
             <div class="flex items-center justify-between">
-                <h2 class="font-display font-black text-xl text-white">Your order</h2>
+                <h2 class="font-display font-extrabold text-xl text-ink">Your order</h2>
                 <a href="{{ url_for('cart.view_cart') }}" class="text-xs font-bold text-brand-orange hover:underline">Edit</a>
             </div>
             <ul class="flex flex-col gap-4 max-h-72 overflow-y-auto pr-1">
                 {% for item in cart_items %}
                 <li class="flex items-center gap-3">
                     <div class="relative flex-shrink-0">
-                        <img src="{{ item.menu_item.image_url }}" alt="" class="w-14 h-14 rounded-xl object-cover border border-white/10" onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
+                        <img src="{{ item.menu_item.image_url }}" alt="" class="w-14 h-14 rounded-xl object-cover border border-stone-900/10" onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
                         <span class="absolute -top-2 -right-2 bb-cart-badge">{{ item.quantity }}</span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-white line-clamp-1">{{ item.menu_item.name }}</p>
-                        {% if item.options %}<p class="text-xs text-neutral-500 line-clamp-1">{{ item.options }}</p>{% endif %}
+                        <p class="text-sm font-semibold text-ink line-clamp-1">{{ item.menu_item.name }}</p>
+                        {% if item.options %}<p class="text-xs text-stone-500 line-clamp-1">{{ item.options }}</p>{% endif %}
                     </div>
-                    <span class="text-sm font-bold text-neutral-200 flex-shrink-0">Rs. {{ "%.0f"|format((item.menu_item.price + (item.options_total or 0)) * item.quantity) }}</span>
+                    <span class="text-sm font-bold text-stone-700 flex-shrink-0">Rs. {{ "%.0f"|format((item.menu_item.price + (item.options_total or 0)) * item.quantity) }}</span>
                 </li>
                 {% endfor %}
             </ul>
             <div class="bb-divider"></div>
             <div class="flex flex-col gap-2.5 text-sm">
-                <div class="flex justify-between text-neutral-400"><span>Subtotal</span><span class="text-white">Rs. {{ "%.0f"|format(total) }}</span></div>
-                <div class="flex justify-between text-neutral-400"><span>Delivery</span><span class="text-white">Rs. {{ delivery_fee }}</span></div>
+                <div class="flex justify-between text-stone-500"><span>Subtotal</span><span class="text-ink">Rs. {{ "%.0f"|format(total) }}</span></div>
+                <div class="flex justify-between text-stone-500"><span>Delivery</span><span class="text-ink">Rs. {{ delivery_fee }}</span></div>
             </div>
             <div class="flex justify-between items-end">
-                <span class="text-neutral-300 font-semibold">Total to pay</span>
+                <span class="text-stone-600 font-semibold">Total to pay</span>
                 <span class="bb-price text-3xl"><small>Rs.</small>{{ "%.0f"|format(total + delivery_fee) }}</span>
             </div>
         </div>

@@ -4,9 +4,9 @@
 {% block content %}
 <div class="min-h-[60vh] grid place-items-center text-center py-10">
     <div class="flex flex-col items-center gap-6" data-reveal="zoom">
-        <span class="text-8xl" style="animation: bbFloat 4s ease-in-out infinite">🔥</span>
-        <h1 class="font-display font-black text-4xl text-white">The kitchen hit a snag.</h1>
-        <p class="text-neutral-400 max-w-md">Something went wrong on our side. Please try again in a moment.</p>
+        <span class="w-20 h-20 rounded-full grid place-items-center text-3xl text-brand-orange bg-orange-50"><i class="bi bi-exclamation-triangle"></i></span>
+        <h1 class="font-display font-extrabold text-4xl text-ink">The kitchen hit a snag.</h1>
+        <p class="text-stone-500 max-w-md">Something went wrong on our side. Please try again in a moment.</p>
         <a href="{{ url_for('main.home') }}" class="bb-btn bb-btn--primary"><i class="bi bi-arrow-clockwise"></i> Back to BiteBuddy</a>
     </div>
 </div>

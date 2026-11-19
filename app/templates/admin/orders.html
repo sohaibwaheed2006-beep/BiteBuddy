@@ -7,7 +7,7 @@
 <div class="flex flex-wrap items-end justify-between gap-4 mb-8" data-reveal>
     <div>
         <span class="bb-eyebrow">Kitchen queue</span>
-        <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-2">Orders <span class="text-neutral-500 text-xl">({{ orders|length }})</span></h1>
+        <h1 class="font-display font-extrabold text-3xl md:text-4xl text-ink mt-2">Orders <span class="text-stone-500 text-xl">({{ orders|length }})</span></h1>
     </div>
     <form method="GET" class="w-full sm:w-56">
         <select name="status" class="bb-input !py-2.5" onchange="this.form.submit()" aria-label="Filter by status">
@@ -24,26 +24,26 @@
     <article class="bb-card p-5 sm:p-6 flex flex-col gap-4" data-reveal>
         <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
             <div class="min-w-0">
-                <h2 class="font-display font-black text-lg text-white flex items-center gap-3">
+                <h2 class="font-display font-extrabold text-lg text-ink flex items-center gap-3">
                     <a href="{{ url_for('orders.track', order_id=order.id) }}" class="hover:text-brand-orange">Order #{{ order.id }}</a>
                     {{ ui.status_badge(order) }}
                 </h2>
-                <p class="text-sm text-neutral-300 mt-1">{{ order.user.username }} · {{ order.phone }} · <span class="text-neutral-500">{{ order.created_at.strftime('%b %d, %H:%M') }}</span></p>
-                <p class="text-xs text-neutral-500 mt-0.5 line-clamp-1">{{ order.delivery_address }}</p>
+                <p class="text-sm text-stone-600 mt-1">{{ order.user.username }} · {{ order.phone }} · <span class="text-stone-500">{{ order.created_at.strftime('%b %d, %H:%M') }}</span></p>
+                <p class="text-xs text-stone-500 mt-0.5 line-clamp-1">{{ order.delivery_address }}</p>
             </div>
             <div class="text-left sm:text-right flex-shrink-0">
                 <p class="bb-price text-2xl"><small>Rs.</small>{{ "%.0f"|format(order.total_amount) }}</p>
-                <p class="text-xs text-neutral-500">{{ 'Cash on delivery' if order.payment_method == 'cash' else 'Card' }}{% if order.payment and order.payment.status == 'completed' %} · paid{% endif %}</p>
+                <p class="text-xs text-stone-500">{{ 'Cash on delivery' if order.payment_method == 'cash' else 'Card' }}{% if order.payment and order.payment.status == 'completed' %} · paid{% endif %}</p>
             </div>
         </div>
 
         <div class="flex flex-wrap gap-2">
             {% for oi in order.items %}
-            <span class="bb-chip !normal-case !tracking-normal !font-semibold"><b class="text-brand-orange">{{ oi.quantity }}×</b> {{ oi.menu_item.name }}{% if oi.options %} <span class="text-neutral-500">· {{ oi.options }}</span>{% endif %}</span>
+            <span class="bb-chip !normal-case !tracking-normal !font-semibold"><b class="text-brand-orange">{{ oi.quantity }}×</b> {{ oi.menu_item.name }}{% if oi.options %} <span class="text-stone-500">· {{ oi.options }}</span>{% endif %}</span>
             {% endfor %}
         </div>
 
-        <form action="{{ url_for('admin.update_order_status', order_id=order.id) }}" method="POST" class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-dashed border-white/10" data-loading>
+        <form action="{{ url_for('admin.update_order_status', order_id=order.id) }}" method="POST" class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-dashed border-stone-900/10" data-loading>
             {{ ui.csrf() }}
             <select name="status" class="bb-input !py-2.5 sm:max-w-xs" aria-label="Order status">
                 {% for s in statuses %}
@@ -54,7 +54,7 @@
         </form>
     </article>
     {% else %}
-    <div class="bb-card py-16 text-center text-neutral-500" data-reveal>No orders {% if status_filter %}with status “{{ status_filter.replace('_', ' ') }}”{% endif %} yet.</div>
+    <div class="bb-card py-16 text-center text-stone-500" data-reveal>No orders {% if status_filter %}with status “{{ status_filter.replace('_', ' ') }}”{% endif %} yet.</div>
     {% endfor %}
 </div>
 {% endblock %}

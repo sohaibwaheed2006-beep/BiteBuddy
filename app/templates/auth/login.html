@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto">
-    <div class="bb-auth" data-reveal="zoom">
+    <div class="bb-auth" data-reveal>
         {% with headline='Welcome back,<br><span class="bb-gradient-text">hungry friend.</span>', sub='Your favourites, saved addresses and order history are right where you left them.' %}
         {% include "auth/_stage.html" %}
         {% endwith %}
@@ -13,8 +13,8 @@
         <div class="bb-auth__form">
             <div class="mb-8">
                 <span class="bb-eyebrow">Sign in</span>
-                <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-3 tracking-tight">Good to see you again</h1>
-                <p class="text-sm text-neutral-400 mt-2">New here? <a href="{{ url_for('auth.register') }}" class="text-brand-orange font-bold hover:underline">Create a free account</a></p>
+                <h1 class="font-display font-extrabold text-3xl md:text-4xl text-ink mt-3 tracking-tight">Good to see you again</h1>
+                <p class="text-sm text-stone-500 mt-2">New here? <a href="{{ url_for('auth.register') }}" class="text-brand-orange font-bold hover:underline">Create a free account</a></p>
             </div>
 
             <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) if request.args.get('next') else url_for('auth.login') }}" class="flex flex-col gap-5" data-loading>
@@ -50,7 +50,7 @@
 
             <div class="flex items-center gap-4 my-8">
                 <div class="bb-divider flex-1"></div>
-                <span class="text-[11px] font-bold uppercase tracking-widest text-neutral-500">or just browse</span>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-stone-500">or just browse</span>
                 <div class="bb-divider flex-1"></div>
             </div>
             <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--ghost bb-btn--block"><i class="bi bi-grid"></i> Look at the menu first</a>
@@ -59,6 +59,3 @@
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script type="module" src="{{ asset('js/food3d.js') }}"></script>
-{% endblock %}

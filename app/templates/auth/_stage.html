@@ -1,18 +1,16 @@
-{# Left-hand 3D panel shared by the login and register pages. Expects `headline` and `sub`. #}
+{# Left-hand photo panel shared by the login and register pages. Expects `headline` and `sub`. #}
 <div class="bb-auth__stage">
-    <div class="bb3d" id="auth-stage" data-food3d data-food3d-mode="float" data-food3d-model="burger">
-        <img class="bb3d__fallback !inset-[18%] !w-[64%] !h-[64%]" src="{{ asset('images/hero_burger.webp') }}" alt="" aria-hidden="true">
-    </div>
-    <div class="flex items-center justify-between">
-        <span class="bb-chip"><span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]"></span> Kitchen open now</span>
+    <img src="{{ asset('images/auth_panel.jpg') }}" alt="" aria-hidden="true">
+    <div class="flex items-center justify-between gap-2">
+        <span class="bb-chip"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Kitchen open now</span>
         <span class="bb-chip bb-chip--gold"><i class="bi bi-star-fill"></i> 4.9 rated</span>
     </div>
-    <div class="relative max-w-sm mt-auto pt-56 lg:pt-0">
-        <h2 class="font-display font-black text-3xl md:text-4xl leading-[1.02] tracking-tight text-white">{{ headline|safe }}</h2>
-        <p class="text-sm text-neutral-300 mt-3 leading-relaxed">{{ sub }}</p>
+    <div class="relative max-w-sm mt-auto pt-40 lg:pt-0">
+        <h2 class="font-display font-extrabold text-3xl md:text-4xl leading-[1.08] tracking-tight">{{ headline|safe }}</h2>
+        <p class="text-sm text-white/80 mt-3 leading-relaxed">{{ sub }}</p>
         <div class="flex flex-col gap-3 mt-6">
-            <span class="bb-perk"><i class="bi bi-lightning-charge-fill"></i> Hot to your door in ~30 minutes</span>
-            <span class="bb-perk"><i class="bi bi-geo-alt-fill"></i> Live order tracking, every step</span>
+            <span class="bb-perk"><i class="bi bi-stopwatch"></i> Hot to your door in about 30 minutes</span>
+            <span class="bb-perk"><i class="bi bi-geo-alt"></i> Live order tracking, every step</span>
             <span class="bb-perk"><i class="bi bi-shield-check"></i> Cash on delivery or secure card</span>
         </div>
     </div>

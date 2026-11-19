@@ -18,7 +18,7 @@
                     <div class="bb-ccard__face bb-ccard__front">
                         <div class="flex items-center justify-between relative">
                             <span class="bb-ccard__chip"></span>
-                            <span class="flex items-center gap-2 font-display font-black text-lg">{{ ui.logo_mark(22) }} BiteBuddy</span>
+                            <span class="flex items-center gap-2 font-display font-extrabold text-lg">{{ ui.logo_mark(22) }} BiteBuddy</span>
                         </div>
                         <div class="bb-ccard__number" id="cc-number">•••• •••• •••• ••••</div>
                         <div class="bb-ccard__meta">
@@ -29,11 +29,11 @@
                     <div class="bb-ccard__face bb-ccard__back">
                         <div class="bb-ccard__strip"></div>
                         <div class="bb-ccard__cvc" id="cc-cvc">•••</div>
-                        <p class="text-[10px] text-white/50 px-6 mt-4 leading-relaxed">Demo card for BiteBuddy's simulated checkout. No real payment is processed.</p>
+                        <p class="text-[10px] text-stone-600 px-6 mt-4 leading-relaxed">Demo card for BiteBuddy's simulated checkout. No real payment is processed.</p>
                     </div>
                 </div>
             </div>
-            <p class="text-xs text-neutral-500 flex items-center gap-2"><i class="bi bi-arrow-repeat"></i> The card flips when you enter the CVC</p>
+            <p class="text-xs text-stone-500 flex items-center gap-2"><i class="bi bi-arrow-repeat"></i> The card flips when you enter the CVC</p>
         </div>
 
         <!-- Form -->
@@ -67,8 +67,8 @@
             <button type="submit" class="bb-btn bb-btn--primary bb-btn--lg bb-btn--block mt-2">
                 <i class="bi bi-lock-fill"></i> Pay Rs. {{ "%.0f"|format(order.total_amount) }}
             </button>
-            <p class="text-xs text-neutral-500 text-center flex items-center justify-center gap-1.5">
-                <i class="bi bi-shield-fill-check text-emerald-400"></i> Simulated payment — no real charge is made.
+            <p class="text-xs text-stone-500 text-center flex items-center justify-center gap-1.5">
+                <i class="bi bi-shield-fill-check text-emerald-600"></i> Simulated payment — no real charge is made.
             </p>
         </form>
     </div>

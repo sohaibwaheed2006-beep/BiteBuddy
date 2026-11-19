@@ -14,7 +14,7 @@
     ('delivered', 'bi-house-heart-fill', 'Delivered', 100),
 ] %}
 
-<a href="{{ url_for('orders.history') if not current_user.is_admin else url_for('admin.manage_orders') }}" class="inline-flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition mb-6">
+<a href="{{ url_for('orders.history') if not current_user.is_admin else url_for('admin.manage_orders') }}" class="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-ink transition mb-6">
     <i class="bi bi-arrow-left"></i> Back to orders
 </a>
 
@@ -23,8 +23,8 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <span class="bb-eyebrow">Live tracking</span>
-                <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-2">Order #{{ order.id }}</h1>
-                <p class="text-sm text-neutral-400 mt-1">Placed {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                <h1 class="font-display font-extrabold text-3xl md:text-4xl text-ink mt-2">Order #{{ order.id }}</h1>
+                <p class="text-sm text-stone-500 mt-1">Placed {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
             </div>
             {{ ui.status_badge(order) }}
         </div>
@@ -33,7 +33,7 @@
         <div class="bb-track mt-10" data-progress="{{ order.status_percentage }}">
             <div class="bb-track__rail">
                 <div class="bb-track__fill"></div>
-                <div class="bb-track__rider" aria-hidden="true">{{ '🏠' if order.status == 'delivered' else '🛵' }}</div>
+                <div class="bb-track__rider" aria-hidden="true"><i class="bi {{ 'bi-house-check' if order.status == 'delivered' else 'bi-bicycle' }}"></i></div>
             </div>
             <ol class="bb-track__steps">
                 {% for key, icon, label, pct in steps %}
@@ -45,53 +45,53 @@
             </ol>
         </div>
         {% if order.status not in ['delivered'] %}
-        <p class="text-xs text-neutral-500 text-center mt-8 flex items-center justify-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> This page refreshes automatically</p>
+        <p class="text-xs text-stone-500 text-center mt-8 flex items-center justify-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> This page refreshes automatically</p>
         {% endif %}
         {% else %}
         <div class="mt-8 flex flex-col items-center gap-3 py-8 rounded-3xl bg-red-500/5 border border-red-500/15 text-center">
-            <i class="bi bi-x-octagon-fill text-4xl text-red-400"></i>
-            <h2 class="font-display font-black text-xl text-red-300">This order was cancelled</h2>
-            <p class="text-sm text-neutral-400">Questions? Reach us at support@bitebuddy.com.</p>
+            <i class="bi bi-x-octagon-fill text-4xl text-red-600"></i>
+            <h2 class="font-display font-extrabold text-xl text-red-600">This order was cancelled</h2>
+            <p class="text-sm text-stone-500">Questions? Reach us at support@bitebuddy.com.</p>
         </div>
         {% endif %}
     </section>
 
     <div class="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] gap-6">
         <section class="bb-card p-6 sm:p-7" data-reveal>
-            <h2 class="font-display font-black text-lg text-white mb-5 flex items-center gap-2"><i class="bi bi-bag-fill text-brand-orange"></i> Items</h2>
+            <h2 class="font-display font-extrabold text-lg text-ink mb-5 flex items-center gap-2"><i class="bi bi-bag-fill text-brand-orange"></i> Items</h2>
             <ul class="flex flex-col gap-4">
                 {% for oi in order.items %}
                 <li class="flex items-center gap-3">
-                    <img src="{{ oi.menu_item.image_url }}" alt="" class="w-12 h-12 rounded-xl object-cover border border-white/10" onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
+                    <img src="{{ oi.menu_item.image_url }}" alt="" class="w-12 h-12 rounded-xl object-cover border border-stone-900/10" onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm text-white font-semibold line-clamp-1"><span class="text-brand-orange">{{ oi.quantity }}×</span> {{ oi.menu_item.name }}</p>
-                        {% if oi.options %}<p class="text-xs text-neutral-500 line-clamp-1">{{ oi.options }}</p>{% endif %}
+                        <p class="text-sm text-ink font-semibold line-clamp-1"><span class="text-brand-orange">{{ oi.quantity }}×</span> {{ oi.menu_item.name }}</p>
+                        {% if oi.options %}<p class="text-xs text-stone-500 line-clamp-1">{{ oi.options }}</p>{% endif %}
                     </div>
-                    <span class="text-sm font-bold text-neutral-200">Rs. {{ "%.0f"|format(oi.subtotal) }}</span>
+                    <span class="text-sm font-bold text-stone-700">Rs. {{ "%.0f"|format(oi.subtotal) }}</span>
                 </li>
                 {% endfor %}
             </ul>
             <div class="bb-divider my-5"></div>
             <div class="flex flex-col gap-2 text-sm">
-                <div class="flex justify-between text-neutral-400"><span>Subtotal</span><span class="text-white">Rs. {{ "%.0f"|format(items_subtotal) }}</span></div>
-                <div class="flex justify-between text-neutral-400"><span>Delivery</span><span class="text-white">Rs. {{ "%.0f"|format(fee) }}</span></div>
-                <div class="flex justify-between items-end mt-2"><span class="text-neutral-300 font-semibold">Total</span><span class="bb-price text-2xl"><small>Rs.</small>{{ "%.0f"|format(order.total_amount) }}</span></div>
+                <div class="flex justify-between text-stone-500"><span>Subtotal</span><span class="text-ink">Rs. {{ "%.0f"|format(items_subtotal) }}</span></div>
+                <div class="flex justify-between text-stone-500"><span>Delivery</span><span class="text-ink">Rs. {{ "%.0f"|format(fee) }}</span></div>
+                <div class="flex justify-between items-end mt-2"><span class="text-stone-600 font-semibold">Total</span><span class="bb-price text-2xl"><small>Rs.</small>{{ "%.0f"|format(order.total_amount) }}</span></div>
             </div>
         </section>
 
         <section class="bb-card p-6 sm:p-7 flex flex-col gap-5" data-reveal style="--reveal-delay:.1s">
-            <h2 class="font-display font-black text-lg text-white flex items-center gap-2"><i class="bi bi-geo-alt-fill text-brand-orange"></i> Delivery</h2>
+            <h2 class="font-display font-extrabold text-lg text-ink flex items-center gap-2"><i class="bi bi-geo-alt-fill text-brand-orange"></i> Delivery</h2>
             <div>
-                <p class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold mb-1">Address</p>
-                <p class="text-sm text-neutral-200 leading-relaxed">{{ order.delivery_address }}</p>
+                <p class="text-[11px] uppercase tracking-widest text-stone-500 font-bold mb-1">Address</p>
+                <p class="text-sm text-stone-700 leading-relaxed">{{ order.delivery_address }}</p>
             </div>
             <div>
-                <p class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold mb-1">Phone</p>
-                <p class="text-sm text-neutral-200">{{ order.phone }}</p>
+                <p class="text-[11px] uppercase tracking-widest text-stone-500 font-bold mb-1">Phone</p>
+                <p class="text-sm text-stone-700">{{ order.phone }}</p>
             </div>
             <div>
-                <p class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold mb-1">Payment</p>
-                <div class="flex items-center gap-2 text-sm text-neutral-200">
+                <p class="text-[11px] uppercase tracking-widest text-stone-500 font-bold mb-1">Payment</p>
+                <div class="flex items-center gap-2 text-sm text-stone-700">
                     {{ 'Cash on delivery' if order.payment_method == 'cash' else 'Card' }}
                     {% if order.payment and order.payment.status == 'completed' %}
                     <span class="bb-status bb-status--delivered">Paid</span>

@@ -18,14 +18,14 @@
         <article class="bb-card p-4 sm:p-5 flex items-center gap-4 sm:gap-5" data-reveal style="--reveal-delay: {{ loop.index0 * 0.05 }}s">
             <a href="{{ url_for('menu.item_detail', item_id=item.menu_item.id) }}" class="flex-shrink-0">
                 <img src="{{ item.menu_item.image_url }}" alt="{{ item.menu_item.name }}" loading="lazy"
-                     class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl border border-white/10 shadow-lg"
+                     class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl border border-stone-900/10 shadow-lg"
                      onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
             </a>
 
             <div class="flex-1 min-w-0">
-                <a href="{{ url_for('menu.item_detail', item_id=item.menu_item.id) }}" class="font-display font-extrabold text-white text-lg hover:text-brand-orange transition line-clamp-1">{{ item.menu_item.name }}</a>
-                {% if item.options %}<p class="text-xs text-neutral-400 mt-0.5 line-clamp-1">{{ item.options }}</p>{% endif %}
-                <p class="text-xs text-neutral-500 mt-1">Rs. {{ "%.0f"|format(unit) }} each</p>
+                <a href="{{ url_for('menu.item_detail', item_id=item.menu_item.id) }}" class="font-display font-extrabold text-ink text-lg hover:text-brand-orange transition line-clamp-1">{{ item.menu_item.name }}</a>
+                {% if item.options %}<p class="text-xs text-stone-500 mt-0.5 line-clamp-1">{{ item.options }}</p>{% endif %}
+                <p class="text-xs text-stone-500 mt-1">Rs. {{ "%.0f"|format(unit) }} each</p>
 
                 <div class="flex items-center justify-between gap-3 mt-3">
                     <form action="{{ url_for('cart.update_cart', cart_item_id=item.id) }}" method="POST">
@@ -42,7 +42,7 @@
 
             <form action="{{ url_for('cart.remove_from_cart', cart_item_id=item.id) }}" method="POST" class="self-start">
                 {{ ui.csrf() }}
-                <button type="submit" class="bb-btn bb-btn--icon !w-9 !h-9 hover:!text-red-300 hover:!bg-red-500/15" aria-label="Remove {{ item.menu_item.name }}" title="Remove">
+                <button type="submit" class="bb-btn bb-btn--icon !w-9 !h-9 hover:!text-red-600 hover:!bg-red-500/15" aria-label="Remove {{ item.menu_item.name }}" title="Remove">
                     <i class="bi bi-x-lg text-sm"></i>
                 </button>
             </form>
@@ -60,29 +60,29 @@
 
     <aside class="lg:sticky lg:top-24" data-reveal="right">
         <div class="bb-glass p-6 sm:p-7 flex flex-col gap-5">
-            <h2 class="font-display font-black text-xl text-white">Order summary</h2>
+            <h2 class="font-display font-extrabold text-xl text-ink">Order summary</h2>
             <div class="flex flex-col gap-3 text-sm">
-                <div class="flex justify-between text-neutral-400"><span>Subtotal · {{ cart_items | sum(attribute='quantity') }} items</span><span class="text-white font-semibold">Rs. {{ "%.0f"|format(total) }}</span></div>
-                <div class="flex justify-between text-neutral-400"><span>Delivery</span><span class="text-white font-semibold">Rs. {{ delivery_fee }}</span></div>
+                <div class="flex justify-between text-stone-500"><span>Subtotal · {{ cart_items | sum(attribute='quantity') }} items</span><span class="text-ink font-semibold">Rs. {{ "%.0f"|format(total) }}</span></div>
+                <div class="flex justify-between text-stone-500"><span>Delivery</span><span class="text-ink font-semibold">Rs. {{ delivery_fee }}</span></div>
             </div>
             <div class="bb-divider"></div>
             <div class="flex justify-between items-end">
-                <span class="text-neutral-300 font-semibold">Total</span>
+                <span class="text-stone-600 font-semibold">Total</span>
                 <span class="bb-price text-3xl"><small>Rs.</small>{{ "%.0f"|format(total + delivery_fee) }}</span>
             </div>
-            <a href="{{ url_for('orders.checkout') }}" class="bb-btn bb-btn--primary bb-btn--lg bb-btn--block" data-magnetic>
+            <a href="{{ url_for('orders.checkout') }}" class="bb-btn bb-btn--primary bb-btn--lg bb-btn--block">
                 <i class="bi bi-lock-fill"></i> Checkout
             </a>
-            <p class="text-xs text-neutral-500 text-center flex items-center justify-center gap-1.5"><i class="bi bi-shield-check text-emerald-400"></i> Cash on delivery or secure card payment</p>
+            <p class="text-xs text-stone-500 text-center flex items-center justify-center gap-1.5"><i class="bi bi-shield-check text-emerald-600"></i> Cash on delivery or secure card payment</p>
         </div>
     </aside>
 </div>
 
 {% else %}
 <div class="bb-card py-20 px-6 text-center max-w-lg mx-auto" data-reveal="zoom">
-    <div class="text-7xl mb-6" style="animation: bbFloat 5s ease-in-out infinite; display:inline-block">🛍️</div>
-    <h2 class="font-display font-black text-3xl text-white">Your cart is empty</h2>
-    <p class="text-neutral-400 mt-2 mb-8">Nothing in here yet — let's find something delicious.</p>
+    <div class="w-20 h-20 mx-auto mb-6 rounded-full grid place-items-center text-3xl text-brand-orange bg-orange-50"><i class="bi bi-bag"></i></div>
+    <h2 class="font-display font-extrabold text-3xl text-ink">Your cart is empty</h2>
+    <p class="text-stone-500 mt-2 mb-8">Nothing in here yet — let's find something delicious.</p>
     <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg"><i class="bi bi-grid-fill"></i> Browse the menu</a>
 </div>
 {% endif %}

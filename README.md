@@ -1,14 +1,14 @@
-# BiteBuddy 🍔
+# BiteBuddy
 
-A full-stack food ordering web app built with **Flask**, with a dark, animated 3D front end: interactive three.js burgers and pizzas, tilt-reactive cards and live order tracking.
+A full-stack food ordering web app built with **Flask**, with a light, editorial front end built around real food photography, smooth motion and live order tracking.
 
 ## Features
 
-- **Interactive 3D food.** Procedurally modelled burger and pizza in three.js. Drag to spin, scroll or tap to explode them into labelled layers. On item pages the 3D build updates live as you pick add-ons and sizes.
+- **Polished, realistic UI.** Warm light theme, real food photography, gentle scroll parallax, eased scroll reveals, image fade-in and pointer-following photo zoom on dish pages. Motion respects `prefers-reduced-motion`.
 - **Accounts.** Register, sign in and edit your profile, with password strength and match checks.
 - **Menu.** Browse by category, search, live-filter, and see every dish with its own photo.
 - **Cart.** Add to cart instantly (AJAX, with a fly-to-cart animation), change quantities, clear the cart.
-- **Checkout and payment.** Cash on delivery, or a simulated card gateway with a 3D card preview.
+- **Checkout and payment.** Cash on delivery, or a simulated card gateway with a live card preview.
 - **Order tracking.** Animated progress from *Received* to *Delivered*, with auto-refresh.
 - **Admin dashboard.** Revenue and order stats, and full management of menu items, categories and order status.
 - **Security.** CSRF protection on every form, server-side option pricing, safe redirects.
@@ -16,7 +16,7 @@ A full-stack food ordering web app built with **Flask**, with a dark, animated 3
 ## Tech stack
 
 - **Backend:** Flask, Flask-SQLAlchemy, Flask-Login, Flask-WTF (CSRF), PyMySQL
-- **Frontend:** Jinja templates, Tailwind CSS (CDN), custom CSS design system, three.js (ES modules), vanilla JS
+- **Frontend:** Jinja templates, Tailwind CSS (CDN), custom CSS design system, vanilla JS
 - **Database:** MySQL (`DATABASE_URL` or local server), with automatic SQLite fallback for local development
 - **Hosting:** Vercel (`vercel.json` routes every request to `api/index.py`)
 
@@ -61,9 +61,7 @@ app/
   templates/          Jinja pages (+ _macros.html for shared UI)
   static/
     css/style.css     BiteBuddy design system
-    js/main.js        site interactions (tilt, reveals, toasts, cart…)
-    js/food3d.js      three.js stage: lighting, controls, explode, labels
-    js/food-models.js procedural burger & pizza models
+    js/main.js        site interactions (reveals, parallax, zoom, toasts, cart…)
     images/           menu photography (see download_images.py for sources)
 api/index.py          Vercel entry point
 ```

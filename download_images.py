@@ -53,8 +53,10 @@ IMAGES = {
     'item_sundae.jpg': '1773620492666-86b9ab584ea4',
     'item_brownie.jpg': '1624353365286-3f8d62daad51',
 }
+# Large hero/panel photos (fetched at their own sizes): hero_main.jpg 1568901346375-23c9450c58cd (1400x1600),
+# hero_pizza.jpg 1513104890138-7c749659a591 (900x900), auth_panel.jpg 1555939594-58d7cb561ad1 (1200x1500)
 # Not on Unsplash (custom shots kept in the repo): cat_beverages, cat_sides, cat_desserts,
-# item_supreme, item_wings, hero_burger.webp, hero_pizza.webp
+# item_supreme, item_wings
 
 
 def main(force=False):

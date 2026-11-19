@@ -6,82 +6,48 @@
 
 {% block content %}
 {% set cat_name = item.category.name if item.category else '' %}
-{% set kind3d = 'pizza' if cat_name == 'Pizza' else ('burger' if cat_name == 'Burgers' else None) %}
 
-<nav class="flex items-center gap-2 text-sm text-neutral-500 mb-6" aria-label="Breadcrumb">
-    <a href="{{ url_for('menu.browse') }}" class="hover:text-white transition">Menu</a>
+<nav class="flex items-center gap-2 text-sm text-stone-500 mb-6" aria-label="Breadcrumb">
+    <a href="{{ url_for('menu.browse') }}" class="hover:text-ink transition">Menu</a>
     <i class="bi bi-chevron-right text-[10px]"></i>
     {% if item.category %}
-    <a href="{{ url_for('menu.browse', category=item.category_id) }}" class="hover:text-white transition">{{ cat_name }}</a>
+    <a href="{{ url_for('menu.browse', category=item.category_id) }}" class="hover:text-ink transition">{{ cat_name }}</a>
     <i class="bi bi-chevron-right text-[10px]"></i>
     {% endif %}
-    <span class="text-neutral-300 truncate">{{ item.name }}</span>
+    <span class="text-stone-600 truncate">{{ item.name }}</span>
 </nav>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start" data-product>
 
     <!-- ── Media ── -->
     <div class="lg:sticky lg:top-24" data-reveal="left">
-        <div class="relative rounded-[32px] overflow-hidden border border-white/10 bg-[#0d0d12] shadow-[0_40px_100px_-30px_rgba(0,0,0,.95)] aspect-square sm:aspect-[5/4]">
-            <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(70% 60% at 50% 45%, rgba(255,107,53,.22), transparent 70%)"></div>
-
-            <!-- photo view -->
-            <div id="media-photo" class="absolute inset-0 {% if kind3d %}hidden{% endif %}" data-tilt data-tilt-max="6">
-                <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover" data-fly-source
-                     onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
-                <div class="bb-glare"></div>
-            </div>
-
-            {% if kind3d %}
-            <!-- 3D view -->
-            <div id="media-3d" class="absolute inset-0">
-                <div class="bb3d !min-h-0" id="item-stage" data-food3d data-food3d-mode="showcase" data-food3d-model="{{ kind3d }}" data-food3d-form="#item-form">
-                    <img class="bb3d__fallback" src="{{ asset('images/hero_' ~ kind3d ~ '.webp') }}" alt="" aria-hidden="true">
-                    <div class="bb3d__labels" aria-hidden="true"></div>
-                </div>
-                <div class="absolute left-4 bottom-4 z-[3]">
-                    <button type="button" class="bb-btn bb-btn--ghost bb-btn--sm !bg-black/50 backdrop-blur" data-food3d-explode data-target="#item-stage" data-label-off="See the layers" data-label-on="Stack it back" aria-pressed="false">
-                        <i class="bi bi-layers-half"></i> <span data-label>See the layers</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- view switcher -->
-            <div class="absolute right-4 top-4 z-[4]">
-                <div class="bb-segment" role="tablist" aria-label="Choose view">
-                    <span class="bb-segment__pill"></span>
-                    <button type="button" class="is-active" data-media-view="3d" role="tab" aria-selected="true"><i class="bi bi-badge-3d"></i> 3D build</button>
-                    <button type="button" data-media-view="photo" role="tab" aria-selected="false"><i class="bi bi-image"></i> Photo</button>
-                </div>
-            </div>
-            {% endif %}
-
+        <div class="bb-zoom rounded-[24px] border border-stone-900/10 bg-stone-100 shadow-xl aspect-square sm:aspect-[5/4]" data-zoom>
+            <img src="{{ item.image_url }}" alt="{{ item.name }}" class="bb-fade" data-fly-source
+                 onerror="this.onerror=null;this.src='/static/images/default_food.jpg'">
             {% if item.category %}
-            <span class="bb-chip bb-chip--brand absolute left-4 top-4 z-[4]">{{ cat_name }}</span>
+            <span class="bb-chip absolute left-4 top-4 z-[2]">{{ cat_name }}</span>
             {% endif %}
         </div>
-        {% if kind3d %}
-        <p class="text-xs text-neutral-500 mt-3 text-center"><i class="bi bi-arrows-move"></i> Drag to rotate · the 3D build updates as you pick {{ 'a size' if kind3d == 'pizza' else 'add-ons' }}. Photo shows the real dish.</p>
-        {% endif %}
+        <p class="hidden md:block text-xs text-stone-500 mt-3 text-center"><i class="bi bi-zoom-in"></i> Hover over the photo to look closer</p>
     </div>
 
     <!-- ── Details & order ── -->
     <div class="flex flex-col gap-6" data-reveal="right">
         <div>
             <div class="flex items-center gap-3 text-sm mb-3">
-                <span class="flex items-center gap-1 text-brand-yellow font-bold"><i class="bi bi-star-fill"></i> 4.9</span>
-                <span class="w-1 h-1 rounded-full bg-neutral-600"></span>
-                <span class="text-neutral-400"><i class="bi bi-clock"></i> Made to order</span>
-                <span class="w-1 h-1 rounded-full bg-neutral-600"></span>
-                <span class="text-emerald-400 font-semibold"><i class="bi bi-check-circle-fill"></i> Available</span>
+                <span class="flex items-center gap-1 text-ink font-semibold"><i class="bi bi-star-fill text-amber-500"></i> 4.9</span>
+                <span class="w-1 h-1 rounded-full bg-stone-300"></span>
+                <span class="text-stone-500"><i class="bi bi-clock"></i> Made to order</span>
+                <span class="w-1 h-1 rounded-full bg-stone-300"></span>
+                <span class="text-emerald-600 font-semibold"><i class="bi bi-check-circle-fill"></i> Available</span>
             </div>
-            <h1 class="font-display font-black text-4xl md:text-5xl text-white tracking-tight leading-[1.02]">{{ item.name }}</h1>
-            <p class="text-neutral-400 leading-relaxed mt-4 text-[15px]">{{ item.description }}</p>
+            <h1 class="font-display font-extrabold text-4xl md:text-5xl text-ink tracking-tight leading-[1.05]">{{ item.name }}</h1>
+            <p class="text-stone-500 leading-relaxed mt-4 text-[15px]">{{ item.description }}</p>
         </div>
 
         <div class="flex items-end gap-3">
             <span class="bb-price text-5xl" id="main-price" data-base-price="{{ item.price }}"><small>Rs.</small><span>{{ "%.0f"|format(item.price) }}</span></span>
-            <span class="text-sm text-neutral-500 mb-2">+ Rs. {{ delivery_fee }} delivery</span>
+            <span class="text-sm text-stone-500 mb-2">+ Rs. {{ delivery_fee }} delivery</span>
         </div>
 
         {% if current_user.is_authenticated %}
@@ -95,7 +61,7 @@
                 <label class="bb-option">
                     <input type="radio" name="size" value="{{ size }}|{{ extra }}" {% if size == 'Large' %}checked{% endif %} required>
                     <span class="bb-option__dot"></span>
-                    <span class="flex flex-col"><b class="text-white text-sm">{{ size }}</b><span class="text-xs text-neutral-500">{{ desc }}</span></span>
+                    <span class="flex flex-col"><b class="text-ink text-sm">{{ size }}</b><span class="text-xs text-stone-500">{{ desc }}</span></span>
                     <span class="bb-option__price">Rs. {{ "%.0f"|format(item.price + extra) }}</span>
                 </label>
                 {% endfor %}
@@ -107,7 +73,7 @@
                 <label class="bb-option bb-option--check">
                     <input type="checkbox" name="addon" value="{{ addon }}|{{ extra }}">
                     <span class="bb-option__dot"></span>
-                    <span class="flex flex-col"><b class="text-white text-sm">{{ addon }}</b><span class="text-xs text-neutral-500">{{ desc }}</span></span>
+                    <span class="flex flex-col"><b class="text-ink text-sm">{{ addon }}</b><span class="text-xs text-stone-500">{{ desc }}</span></span>
                     <span class="bb-option__price">+ Rs. {{ extra }}</span>
                 </label>
                 {% endfor %}
@@ -120,7 +86,7 @@
                     <input type="number" id="quantity" name="quantity" value="1" min="1" max="50" inputmode="numeric" aria-label="Quantity">
                     <button type="button" data-qty-step="1" aria-label="Increase quantity"><i class="bi bi-plus-lg"></i></button>
                 </div>
-                <button type="submit" class="bb-btn bb-btn--primary bb-btn--lg flex-1" data-magnetic>
+                <button type="submit" class="bb-btn bb-btn--primary bb-btn--lg flex-1">
                     <i class="bi bi-bag-plus-fill"></i> Add to cart · <span id="cta-price">Rs. {{ "%.0f"|format(item.price) }}</span>
                 </button>
             </div>
@@ -128,17 +94,17 @@
         {% else %}
         <div class="bb-card p-6 flex flex-col sm:flex-row items-center gap-4">
             <div class="flex-1 text-center sm:text-left">
-                <p class="font-bold text-white">Sign in to order</p>
-                <p class="text-sm text-neutral-400">Takes seconds — and we'll remember your address.</p>
+                <p class="font-bold text-ink">Sign in to order</p>
+                <p class="text-sm text-stone-500">Takes seconds — and we'll remember your address.</p>
             </div>
             <a href="{{ url_for('auth.login', next=request.path) }}" class="bb-btn bb-btn--primary"><i class="bi bi-box-arrow-in-right"></i> Sign in</a>
         </div>
         {% endif %}
 
         <div class="grid grid-cols-3 gap-3 pt-2">
-            <div class="bb-card p-4 text-center"><i class="bi bi-fire text-brand-orange text-xl"></i><p class="text-xs text-neutral-400 mt-1">Cooked fresh</p></div>
-            <div class="bb-card p-4 text-center"><i class="bi bi-lightning-charge-fill text-brand-yellow text-xl"></i><p class="text-xs text-neutral-400 mt-1">~30 min delivery</p></div>
-            <div class="bb-card p-4 text-center"><i class="bi bi-geo-alt-fill text-emerald-400 text-xl"></i><p class="text-xs text-neutral-400 mt-1">Live tracking</p></div>
+            <div class="bb-card p-4 text-center"><i class="bi bi-fire text-brand-orange text-xl"></i><p class="text-xs text-stone-500 mt-1">Cooked fresh</p></div>
+            <div class="bb-card p-4 text-center"><i class="bi bi-lightning-charge-fill text-brand-yellow text-xl"></i><p class="text-xs text-stone-500 mt-1">~30 min delivery</p></div>
+            <div class="bb-card p-4 text-center"><i class="bi bi-geo-alt-fill text-emerald-600 text-xl"></i><p class="text-xs text-stone-500 mt-1">Live tracking</p></div>
         </div>
     </div>
 </div>
@@ -174,24 +140,6 @@
         if (ctaEl) ctaEl.textContent = 'Rs. ' + (unit * qty).toFixed(0);
     };
     if (form) { form.addEventListener('change', update); form.addEventListener('input', update); update(); }
-
-    // Photo / 3D switcher
-    const photo = document.getElementById('media-photo');
-    const view3d = document.getElementById('media-3d');
-    document.querySelectorAll('[data-media-view]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const is3d = btn.dataset.mediaView === '3d';
-            if (photo) photo.classList.toggle('hidden', is3d);
-            if (view3d) view3d.classList.toggle('hidden', !is3d);
-            const seg = btn.closest('.bb-segment');
-            seg.querySelectorAll('button').forEach((b) => { b.classList.toggle('is-active', b === btn); b.setAttribute('aria-selected', String(b === btn)); });
-            if (window.BB && window.BB.syncSegment) window.BB.syncSegment(seg);
-        });
-    });
 })();
 </script>
-{# blocks don't share variables, so re-check the category here #}
-{% if item.category and item.category.name in ['Pizza', 'Burgers'] %}
-<script type="module" src="{{ asset('js/food3d.js') }}"></script>
-{% endif %}
 {% endblock %}

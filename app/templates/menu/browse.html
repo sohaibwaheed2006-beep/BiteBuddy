@@ -4,10 +4,6 @@
 {% block title %}{% if search_query %}“{{ search_query }}” — {% elif active_category %}{{ active_category.name }} — {% endif %}Menu · BiteBuddy{% endblock %}
 
 {% block content %}
-{% set cat_icons = {
-    'Burgers': '🍔', 'Fried Chicken': '🍗', 'Pizza': '🍕', 'Wraps & Rolls': '🌯',
-    'Sides': '🍟', 'Beverages': '🥤', 'Desserts': '🍰'
-} %}
 <!-- Header -->
 <section class="relative mb-8 md:mb-10" data-reveal>
     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
@@ -15,13 +11,13 @@
             <span class="bb-eyebrow">{% if search_query %}Search{% elif active_category %}Category{% else %}The menu{% endif %}</span>
             {% if search_query %}
             <h1 class="bb-section-title">Results for “<span class="bb-gradient-text">{{ search_query }}</span>”</h1>
-            <p class="text-neutral-400 mt-3">{{ items|length }} dish{{ 'es' if items|length != 1 }} found.</p>
+            <p class="text-stone-500 mt-3">{{ items|length }} dish{{ 'es' if items|length != 1 }} found.</p>
             {% elif active_category %}
-            <h1 class="bb-section-title">{{ cat_icons.get(active_category.name, '🍽️') }} {{ active_category.name }}</h1>
-            {% if active_category.description %}<p class="text-neutral-400 mt-3 max-w-xl">{{ active_category.description }}</p>{% endif %}
+            <h1 class="bb-section-title">{{ active_category.name }}</h1>
+            {% if active_category.description %}<p class="text-stone-500 mt-3 max-w-xl">{{ active_category.description }}</p>{% endif %}
             {% else %}
             <h1 class="bb-section-title">Everything we <span class="bb-gradient-text">cook</span></h1>
-            <p class="text-neutral-400 mt-3 max-w-xl">Hand-crafted to order. Tap any dish for details, sizes and add-ons — burgers and pizzas even come in 3D.</p>
+            <p class="text-stone-500 mt-3 max-w-xl">Hand-crafted to order. Tap any dish for details, sizes and add-ons.</p>
             {% endif %}
         </div>
         {% if items %}
@@ -29,7 +25,7 @@
             <label class="bb-search !py-3" for="menu-filter">
                 <i class="bi bi-funnel"></i>
                 <input type="search" id="menu-filter" data-menu-filter placeholder="Filter these dishes…" autocomplete="off">
-                <span class="text-xs font-bold text-neutral-500 whitespace-nowrap"><span id="bb-filter-count">{{ items|length }}</span> shown</span>
+                <span class="text-xs font-bold text-stone-500 whitespace-nowrap"><span id="bb-filter-count">{{ items|length }}</span> shown</span>
             </label>
         </div>
         {% endif %}
@@ -37,21 +33,21 @@
 </section>
 
 <!-- Category chips -->
-<nav class="sticky top-[64px] z-30 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 mb-8 bg-gradient-to-b from-[#07070a] via-[#07070a]/90 to-transparent" aria-label="Categories">
+<nav class="sticky top-[64px] z-30 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 mb-8 bg-[#faf7f2]/90 backdrop-blur-md" aria-label="Categories">
     <div class="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <a href="{{ url_for('menu.browse') }}"
            class="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border transition-all
-                  {% if not active_category and not search_query %}text-white border-transparent shadow-orange-glow{% else %}text-neutral-300 border-white/10 bg-white/[.03] hover:border-white/25 hover:text-white{% endif %}"
-           {% if not active_category and not search_query %}style="background: var(--bb-grad)" aria-current="page"{% endif %}>
-            🍽️ All
+                  {% if not active_category and not search_query %}text-white border-transparent bg-ink shadow-sm{% else %}text-stone-600 border-stone-900/10 bg-white hover:border-stone-900/25 hover:text-ink{% endif %}"
+           {% if not active_category and not search_query %}aria-current="page"{% endif %}>
+            All
         </a>
         {% for cat in categories %}
         {% set is_active = active_category and active_category.id == cat.id %}
         <a href="{{ url_for('menu.browse', category=cat.id) }}"
            class="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border transition-all
-                  {% if is_active %}text-white border-transparent shadow-orange-glow{% else %}text-neutral-300 border-white/10 bg-white/[.03] hover:border-white/25 hover:text-white{% endif %}"
-           {% if is_active %}style="background: var(--bb-grad)" aria-current="page"{% endif %}>
-            {{ cat_icons.get(cat.name, '🍽️') }} {{ cat.name }}
+                  {% if is_active %}text-white border-transparent bg-ink shadow-sm{% else %}text-stone-600 border-stone-900/10 bg-white hover:border-stone-900/25 hover:text-ink{% endif %}"
+           {% if is_active %}aria-current="page"{% endif %}>
+            {{ cat.name }}
         </a>
         {% endfor %}
     </div>
@@ -65,15 +61,15 @@
     {% endfor %}
 </div>
 <div id="bb-filter-empty" class="hidden bb-card py-16 px-6 text-center">
-    <div class="text-5xl mb-4">🔍</div>
-    <h2 class="font-display font-black text-2xl text-white">Nothing matches that filter</h2>
-    <p class="text-neutral-400 mt-2">Try another word — or clear the filter to see everything.</p>
+    <div class="text-4xl mb-4 text-stone-400"><i class="bi bi-search"></i></div>
+    <h2 class="font-display font-extrabold text-2xl text-ink">Nothing matches that filter</h2>
+    <p class="text-stone-500 mt-2">Try another word — or clear the filter to see everything.</p>
 </div>
 {% else %}
 <div class="bb-card py-20 px-6 text-center max-w-xl mx-auto" data-reveal>
-    <div class="text-6xl mb-5">🍽️</div>
-    <h2 class="font-display font-black text-2xl text-white">{% if search_query %}No dishes match “{{ search_query }}”{% else %}Nothing here yet{% endif %}</h2>
-    <p class="text-neutral-400 mt-2 mb-8">Try a different search or browse the full menu.</p>
+    <div class="text-5xl mb-5 text-stone-400"><i class="bi bi-basket"></i></div>
+    <h2 class="font-display font-extrabold text-2xl text-ink">{% if search_query %}No dishes match “{{ search_query }}”{% else %}Nothing here yet{% endif %}</h2>
+    <p class="text-stone-500 mt-2 mb-8">Try a different search or browse the full menu.</p>
     <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary"><i class="bi bi-grid-fill"></i> View full menu</a>
 </div>
 {% endif %}

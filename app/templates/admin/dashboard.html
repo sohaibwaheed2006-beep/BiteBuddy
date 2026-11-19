@@ -5,7 +5,7 @@
 {% block admin_content %}
 <div class="mb-8" data-reveal>
     <span class="bb-eyebrow">Overview</span>
-    <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-2">Good to see you, {{ current_user.username }}</h1>
+    <h1 class="font-display font-extrabold text-3xl md:text-4xl text-ink mt-2">Good to see you, {{ current_user.username }}</h1>
 </div>
 
 {% set stats = [
@@ -16,18 +16,17 @@
 ] %}
 <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
     {% for icon, label, value, prefix, color, bg in stats %}
-    <div class="bb-card bb-stat" data-tilt data-tilt-max="8" data-reveal style="--reveal-delay: {{ loop.index0 * 0.06 }}s">
-        <div class="bb-glare"></div>
+    <div class="bb-card bb-stat" data-reveal style="--reveal-delay: {{ loop.index0 * 0.06 }}s">
         <div class="bb-stat__icon mb-4" style="color: {{ color }}; background: {{ bg }}; transform: translateZ(30px)"><i class="bi {{ icon }}"></i></div>
-        <p class="bb-stat__value" style="transform: translateZ(20px)">{{ prefix }}<span data-count="{{ '%.0f'|format(value) }}">{{ '%.0f'|format(value) }}</span></p>
-        <p class="text-xs text-neutral-400 mt-1.5">{{ label }}</p>
+        <p class="bb-stat__value">{{ prefix }}<span data-count="{{ '%.0f'|format(value) }}">{{ '%.0f'|format(value) }}</span></p>
+        <p class="text-xs text-stone-500 mt-1.5">{{ label }}</p>
     </div>
     {% endfor %}
 </div>
 
 <div class="bb-card overflow-hidden" data-reveal>
-    <div class="flex items-center justify-between p-5 border-b border-white/5">
-        <h2 class="font-display font-black text-lg text-white flex items-center gap-2"><i class="bi bi-clock-history text-brand-orange"></i> Recent orders</h2>
+    <div class="flex items-center justify-between p-5 border-b border-stone-900/5">
+        <h2 class="font-display font-extrabold text-lg text-ink flex items-center gap-2"><i class="bi bi-clock-history text-brand-orange"></i> Recent orders</h2>
         <a href="{{ url_for('admin.manage_orders') }}" class="bb-btn bb-btn--ghost bb-btn--sm">View all</a>
     </div>
     <div class="overflow-x-auto">
@@ -36,14 +35,14 @@
             <tbody>
                 {% for order in recent_orders %}
                 <tr>
-                    <td><a href="{{ url_for('orders.track', order_id=order.id) }}" class="font-bold text-white hover:text-brand-orange">#{{ order.id }}</a></td>
-                    <td class="text-neutral-300">{{ order.user.username }}</td>
-                    <td class="font-bold text-white">Rs. {{ "%.0f"|format(order.total_amount) }}</td>
+                    <td><a href="{{ url_for('orders.track', order_id=order.id) }}" class="font-bold text-ink hover:text-brand-orange">#{{ order.id }}</a></td>
+                    <td class="text-stone-600">{{ order.user.username }}</td>
+                    <td class="font-bold text-ink">Rs. {{ "%.0f"|format(order.total_amount) }}</td>
                     <td>{{ ui.status_badge(order) }}</td>
-                    <td class="text-neutral-500 text-xs">{{ order.created_at.strftime('%b %d, %H:%M') }}</td>
+                    <td class="text-stone-500 text-xs">{{ order.created_at.strftime('%b %d, %H:%M') }}</td>
                 </tr>
                 {% else %}
-                <tr><td colspan="5" class="py-12 text-center text-neutral-500">No orders yet.</td></tr>
+                <tr><td colspan="5" class="py-12 text-center text-stone-500">No orders yet.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

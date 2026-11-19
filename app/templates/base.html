@@ -5,9 +5,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>{% block title %}BiteBuddy — Hot food, delivered in 3D{% endblock %}</title>
+    <title>{% block title %}BiteBuddy — Fresh food, delivered hot{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}BiteBuddy — order burgers, pizza, fried chicken and more. Fresh, fast, and tracked live to your door.{% endblock %}">
-    <meta name="theme-color" content="#07070a">
+    <meta name="theme-color" content="#faf7f2">
     <meta property="og:site_name" content="BiteBuddy">
     <meta property="og:title" content="{{ self.title() }}">
     <meta property="og:description" content="{{ self.meta_description() }}">
@@ -21,7 +21,7 @@
     <!-- Fonts & icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- Tailwind (utility classes in templates) -->
@@ -31,49 +31,31 @@
             theme: {
                 extend: {
                     colors: {
-                        'brand-red': '#FF3D1F',
-                        'brand-orange': '#FF6B35',
-                        'brand-yellow': '#FFB800',
-                        'brand-gold': '#F2C94C',
-                        'brand-dark': '#07070A',
-                        'brand-charcoal': '#111117',
-                        'brand-accent': '#FF5A1F',
+                        'ink': '#1C1917',
+                        'brand-red': '#DC2626',
+                        'brand-orange': '#E4572E',
+                        'brand-yellow': '#D99A00',
+                        'brand-gold': '#D99A00',
+                        'brand-dark': '#1C1917',
+                        'brand-charcoal': '#292524',
+                        'brand-accent': '#C8461F',
                     },
-                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Outfit', 'sans-serif'] },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    fontWeight: { black: '800' },
                     boxShadow: {
-                        'orange-glow': '0 14px 40px -12px rgba(255, 107, 53, .65)',
-                        'glass': '0 24px 60px -24px rgba(0, 0, 0, .85)',
-                        'inner-glass': 'inset 0 1px 1px rgba(255, 255, 255, .05)',
+                        'orange-glow': '0 8px 20px -8px rgba(220, 79, 37, .55)',
+                        'glass': '0 1px 2px rgba(28, 25, 23, .04), 0 10px 30px -12px rgba(28, 25, 23, .12)',
+                        'inner-glass': 'inset 0 1px 1px rgba(255, 255, 255, .6)',
                     },
                 },
             },
         };
     </script>
 
-    <!-- three.js as an ES module; local modules are cache-busted through the import map -->
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
-            "bb-models": "{{ asset('js/food-models.js') }}"
-        }
-    }
-    </script>
-
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="min-h-screen flex flex-col overflow-x-hidden {% block body_class %}{% endblock %}">
-
-    <!-- Ambient background -->
-    <div class="bb-ambient" aria-hidden="true">
-        <div class="bb-ambient__blob bb-ambient__blob--1"></div>
-        <div class="bb-ambient__blob bb-ambient__blob--2"></div>
-        <div class="bb-ambient__blob bb-ambient__blob--3"></div>
-        <div class="bb-ambient__grain"></div>
-    </div>
-    <div class="bb-spotlight" aria-hidden="true"></div>
 
     <!-- Navbar -->
     <header class="bb-nav" id="bb-nav">
@@ -110,15 +92,15 @@
                     </a>
                     {% endif %}
                     <div class="relative hidden md:block">
-                        <button type="button" class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-white/10 hover:border-white/20 bg-white/5 transition" id="bb-user-btn" aria-haspopup="true" aria-expanded="false">
-                            <span class="w-8 h-8 rounded-full grid place-items-center font-display font-black text-sm text-white" style="background: var(--bb-grad)">{{ current_user.username[:1]|upper }}</span>
-                            <span class="text-sm font-semibold text-white max-w-[110px] truncate">{{ current_user.username }}</span>
-                            <i class="bi bi-chevron-down text-[10px] text-neutral-400"></i>
+                        <button type="button" class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-stone-900/10 hover:border-stone-900/20 bg-white transition" id="bb-user-btn" aria-haspopup="true" aria-expanded="false">
+                            <span class="w-8 h-8 rounded-full grid place-items-center font-display font-bold text-sm text-white" style="background: var(--bb-grad)">{{ current_user.username[:1]|upper }}</span>
+                            <span class="text-sm font-semibold text-ink max-w-[110px] truncate">{{ current_user.username }}</span>
+                            <i class="bi bi-chevron-down text-[10px] text-stone-500"></i>
                         </button>
                         <div class="bb-dropdown" id="bb-user-menu" role="menu">
-                            <div class="px-3 py-2 mb-1 border-b border-white/5">
-                                <p class="text-xs text-neutral-500">Signed in as</p>
-                                <p class="text-sm font-bold text-white truncate">{{ current_user.email }}</p>
+                            <div class="px-3 py-2 mb-1 border-b border-stone-900/5">
+                                <p class="text-xs text-stone-500">Signed in as</p>
+                                <p class="text-sm font-bold text-ink truncate">{{ current_user.email }}</p>
                             </div>
                             <a href="{{ url_for('auth.profile') }}" role="menuitem"><i class="bi bi-person-fill"></i> Profile</a>
                             {% if current_user.is_admin %}
@@ -131,7 +113,7 @@
                     </div>
                 {% else %}
                     <a href="{{ url_for('auth.login') }}" class="bb-nav__link hidden sm:inline-flex {% if ep == 'auth.login' %}is-active{% endif %}">Sign in</a>
-                    <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--primary bb-btn--sm hidden sm:inline-flex" data-magnetic><i class="bi bi-person-plus-fill"></i> Join free</a>
+                    <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--primary bb-btn--sm hidden sm:inline-flex"><i class="bi bi-person-plus-fill"></i> Join free</a>
                 {% endif %}
                 <button type="button" class="bb-btn bb-btn--icon md:hidden" id="bb-drawer-open" aria-label="Open menu" aria-controls="bb-drawer" aria-expanded="false">
                     <i class="bi bi-list text-xl"></i>
@@ -204,7 +186,7 @@
             <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
                 <div class="md:col-span-5 flex flex-col gap-5">
                     {{ ui.logo() }}
-                    <p class="text-sm leading-relaxed text-neutral-400 max-w-sm">Hot, fresh, crafted-to-order food — from our kitchen to your door, tracked every step of the way.</p>
+                    <p class="text-sm leading-relaxed text-stone-500 max-w-sm">Hot, fresh, crafted-to-order food — from our kitchen to your door, tracked every step of the way.</p>
                     <div class="flex gap-3">
                         <a href="#" class="bb-social" aria-label="BiteBuddy on Facebook"><i class="bi bi-facebook"></i></a>
                         <a href="#" class="bb-social" aria-label="BiteBuddy on Instagram"><i class="bi bi-instagram"></i></a>
@@ -213,7 +195,7 @@
                     </div>
                 </div>
                 <div class="md:col-span-3">
-                    <h4 class="text-sm font-bold text-white uppercase tracking-widest mb-4">Explore</h4>
+                    <h4 class="text-xs font-bold text-stone-500 uppercase tracking-[.14em] mb-4">Explore</h4>
                     <ul class="flex flex-col gap-3">
                         <li><a class="bb-footer__link" href="{{ url_for('main.home') }}">Home</a></li>
                         <li><a class="bb-footer__link" href="{{ url_for('menu.browse') }}">Full menu</a></li>
@@ -224,8 +206,8 @@
                     </ul>
                 </div>
                 <div class="md:col-span-4">
-                    <h4 class="text-sm font-bold text-white uppercase tracking-widest mb-4">Get in touch</h4>
-                    <ul class="flex flex-col gap-3 text-sm text-neutral-400">
+                    <h4 class="text-xs font-bold text-stone-500 uppercase tracking-[.14em] mb-4">Get in touch</h4>
+                    <ul class="flex flex-col gap-3 text-sm text-stone-500">
                         <li class="flex items-center gap-3"><i class="bi bi-geo-alt-fill text-brand-orange"></i> Islamabad, Pakistan</li>
                         <li class="flex items-center gap-3"><i class="bi bi-telephone-fill text-brand-orange"></i> +92 300 1234567</li>
                         <li class="flex items-center gap-3"><i class="bi bi-envelope-fill text-brand-orange"></i> support@bitebuddy.com</li>
@@ -234,11 +216,10 @@
                 </div>
             </div>
         </div>
-        <div class="bb-footer__word" aria-hidden="true">BiteBuddy</div>
-        <div class="border-t border-white/5">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row justify-between gap-2 text-xs text-neutral-500">
+        <div class="border-t border-stone-900/5">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row justify-between gap-2 text-xs text-stone-500">
                 <p>&copy; {{ current_year }} BiteBuddy. All rights reserved.</p>
-                <p>Crafted with <i class="bi bi-heart-fill text-brand-orange"></i> and a little 3D magic.</p>
+                <p>Made fresh in Islamabad.</p>
             </div>
         </div>
     </footer>

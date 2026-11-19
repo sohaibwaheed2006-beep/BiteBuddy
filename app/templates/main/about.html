@@ -4,59 +4,57 @@
 {% block title %}About — BiteBuddy{% endblock %}
 
 {% block content %}
-<section class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center mb-24">
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24 pt-4">
     <div data-reveal="left">
         <span class="bb-eyebrow">Our story</span>
-        <h1 class="font-display font-black text-5xl md:text-6xl text-white tracking-tight leading-[.98] mt-4">Food that's worth<br><span class="bb-gradient-text">the wait</span> — minus the wait.</h1>
-        <p class="text-neutral-400 text-lg leading-relaxed mt-6">BiteBuddy started in Islamabad in 2026 with a simple idea: ordering great food should feel as good as eating it. So we built a kitchen that cooks every order fresh, and an app that shows you exactly where it is.</p>
+        <h1 class="font-display font-extrabold text-5xl md:text-6xl text-ink tracking-tight leading-[1.02] mt-4">Food worth <span class="bb-gradient-text">the wait</span>, without the wait.</h1>
+        <p class="text-stone-600 text-lg leading-relaxed mt-6">BiteBuddy started in Islamabad in 2026 with a simple idea: ordering great food should feel as good as eating it. So we built a kitchen that cooks every order fresh, and an app that shows you exactly where it is.</p>
         <div class="flex flex-wrap gap-3 mt-8">
-            <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg"><i class="bi bi-grid-fill"></i> See the menu</a>
+            <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg">See the menu <i class="bi bi-arrow-right"></i></a>
             {% if not current_user.is_authenticated %}
             <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--ghost bb-btn--lg">Join BiteBuddy</a>
             {% endif %}
         </div>
     </div>
 
-    <div class="relative h-[420px] md:h-[480px]" data-reveal="right" style="perspective: 1200px">
-        <img src="{{ url_for('static', filename='images/cat_burgers.jpg') }}" alt="A BiteBuddy burger" loading="lazy"
-             class="absolute left-0 top-6 w-[62%] aspect-[4/5] object-cover rounded-[28px] border border-white/10 shadow-2xl"
-             style="transform: rotateY(14deg) rotateZ(-4deg)">
-        <img src="{{ url_for('static', filename='images/cat_pizza.jpg') }}" alt="A BiteBuddy pizza" loading="lazy"
-             class="absolute right-0 top-0 w-[52%] aspect-square object-cover rounded-[28px] border border-white/10 shadow-2xl"
-             style="transform: rotateY(-16deg) rotateZ(5deg) translateZ(40px)">
-        <img src="{{ url_for('static', filename='images/item_mango.jpg') }}" alt="A BiteBuddy mango shake" loading="lazy"
-             class="absolute right-[10%] bottom-0 w-[44%] aspect-[4/3] object-cover rounded-[28px] border border-white/10 shadow-2xl"
-             style="transform: rotateX(10deg) rotateZ(-3deg) translateZ(80px)">
-        <span class="bb-chip bb-chip--gold absolute left-[8%] bottom-[8%]" style="transform: translateZ(120px)"><i class="bi bi-star-fill"></i> 4.9 from our regulars</span>
+    <div class="grid grid-cols-2 gap-4" data-reveal="right">
+        <div class="row-span-2 rounded-[24px] overflow-hidden shadow-xl bg-stone-100">
+            <img src="{{ asset('images/hero_main.jpg') }}" alt="A BiteBuddy smash burger" loading="lazy" class="bb-fade w-full h-full object-cover">
+        </div>
+        <div class="rounded-[24px] overflow-hidden shadow-xl bg-stone-100 aspect-square">
+            <img src="{{ asset('images/hero_pizza.jpg') }}" alt="A BiteBuddy pizza" loading="lazy" class="bb-fade w-full h-full object-cover">
+        </div>
+        <div class="rounded-[24px] overflow-hidden shadow-xl bg-stone-100 aspect-square">
+            <img src="{{ url_for('static', filename='images/item_mango.jpg') }}" alt="A BiteBuddy mango shake" loading="lazy" class="bb-fade w-full h-full object-cover">
+        </div>
     </div>
 </section>
 
 <section class="bb-section">
     {{ ui.section_head('What we stand for', 'Four promises, <span class="bb-gradient-text">every order</span>') }}
     {% set values = [
-        ('bi-gem', 'Premium ingredients', 'Fresh produce, real cheddar and quality cuts — we never cut corners on what goes in.'),
-        ('bi-lightning-charge-fill', 'Lightning fast', 'Cooked to order and out the door quickly, so it reaches you hot.'),
-        ('bi-shield-lock-fill', 'Safe payments', 'Pay cash on delivery or by card — whatever suits you.'),
-        ('bi-geo-alt-fill', 'Live tracking', 'Watch your order go from kitchen to doorstep, step by step.'),
+        ('bi-basket2', 'Quality ingredients', 'Fresh produce, real cheddar and quality cuts. We never cut corners on what goes in.'),
+        ('bi-stopwatch', 'Fast delivery', 'Cooked to order and out the door quickly, so it reaches you hot.'),
+        ('bi-shield-check', 'Safe payments', 'Pay cash on delivery or by card, whichever suits you.'),
+        ('bi-geo-alt', 'Live tracking', 'Watch your order go from kitchen to doorstep, step by step.'),
     ] %}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {% for icon, title, text in values %}
-        <div class="bb-card p-7" data-tilt data-reveal style="--reveal-delay: {{ loop.index0 * 0.08 }}s">
-            <div class="bb-glare"></div>
-            <div class="w-14 h-14 rounded-2xl grid place-items-center text-2xl text-white mb-5 shadow-orange-glow" style="background: var(--bb-grad); transform: translateZ(40px)"><i class="bi {{ icon }}"></i></div>
-            <h3 class="font-display font-black text-lg text-white mb-2" style="transform: translateZ(25px)">{{ title }}</h3>
-            <p class="text-sm text-neutral-400 leading-relaxed" style="transform: translateZ(15px)">{{ text }}</p>
+        <div class="bb-card p-7" data-reveal style="--reveal-delay: {{ loop.index0 * 0.08 }}s">
+            <div class="bb-step__icon !mt-0"><i class="bi {{ icon }}"></i></div>
+            <h3 class="font-display font-bold text-lg text-ink mb-2">{{ title }}</h3>
+            <p class="text-sm text-stone-600 leading-relaxed">{{ text }}</p>
         </div>
         {% endfor %}
     </div>
 </section>
 
 <section class="bb-section !mb-8">
-    <div class="bb-glass p-8 md:p-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center" data-reveal="zoom">
-        <div><p class="font-display font-black text-4xl md:text-5xl text-white"><span data-count="30">30</span><span class="text-brand-orange">m</span></p><p class="text-sm text-neutral-400 mt-1">Avg. delivery</p></div>
-        <div><p class="font-display font-black text-4xl md:text-5xl text-white"><span data-count="7">7</span></p><p class="text-sm text-neutral-400 mt-1">Food categories</p></div>
-        <div><p class="font-display font-black text-4xl md:text-5xl text-white"><span data-count="4.9" data-decimals="1">4.9</span><i class="bi bi-star-fill text-brand-yellow text-2xl"></i></p><p class="text-sm text-neutral-400 mt-1">Average rating</p></div>
-        <div><p class="font-display font-black text-4xl md:text-5xl text-white">2<span class="text-brand-orange">am</span></p><p class="text-sm text-neutral-400 mt-1">Open daily until</p></div>
+    <div class="bb-glass p-8 md:p-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center" data-reveal>
+        <div><p class="font-display font-extrabold text-4xl md:text-5xl text-ink"><span data-count="30">30</span><span class="text-brand-orange">m</span></p><p class="text-sm text-stone-500 mt-1">Avg. delivery</p></div>
+        <div><p class="font-display font-extrabold text-4xl md:text-5xl text-ink"><span data-count="7">7</span></p><p class="text-sm text-stone-500 mt-1">Food categories</p></div>
+        <div><p class="font-display font-extrabold text-4xl md:text-5xl text-ink"><span data-count="4.9" data-decimals="1">4.9</span><i class="bi bi-star-fill text-amber-500 text-2xl"></i></p><p class="text-sm text-stone-500 mt-1">Average rating</p></div>
+        <div><p class="font-display font-extrabold text-4xl md:text-5xl text-ink">2<span class="text-brand-orange">am</span></p><p class="text-sm text-stone-500 mt-1">Open daily until</p></div>
     </div>
 </section>
 {% endblock %}

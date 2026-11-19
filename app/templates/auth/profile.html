@@ -6,25 +6,23 @@
 {% block content %}
 <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
 
-    <aside class="bb-glass p-7 text-center flex flex-col items-center gap-4 lg:sticky lg:top-24" data-tilt data-tilt-max="6" data-reveal="left">
-        <div class="bb-glare"></div>
-        <div class="relative" style="transform: translateZ(50px)">
-            <div class="absolute -inset-2 rounded-full blur-xl opacity-70" style="background: var(--bb-grad)"></div>
-            <div class="relative w-28 h-28 rounded-full grid place-items-center font-display font-black text-5xl text-white border-4 border-white/10" style="background: var(--bb-grad)">
+    <aside class="bb-glass p-7 text-center flex flex-col items-center gap-4 lg:sticky lg:top-24" data-reveal="left">
+        <div class="relative">
+            <div class="relative w-28 h-28 rounded-full grid place-items-center font-display font-bold text-5xl text-white border-4 border-white shadow-lg" style="background: var(--bb-grad)">
                 {{ current_user.username[:1]|upper }}
             </div>
         </div>
-        <div style="transform: translateZ(30px)">
-            <h1 class="font-display font-black text-2xl text-white">{{ current_user.username }}</h1>
-            <p class="text-sm text-neutral-400">{{ current_user.email }}</p>
+        <div>
+            <h1 class="font-display font-extrabold text-2xl text-ink">{{ current_user.username }}</h1>
+            <p class="text-sm text-stone-500">{{ current_user.email }}</p>
         </div>
         <span class="bb-chip {% if current_user.is_admin %}bb-chip--gold{% else %}bb-chip--brand{% endif %}">
             <i class="bi {% if current_user.is_admin %}bi-shield-lock-fill{% else %}bi-person-heart{% endif %}"></i>
             {{ 'Admin' if current_user.is_admin else 'BiteBuddy member' }}
         </span>
-        <div class="grid grid-cols-2 gap-3 w-full mt-2" style="transform: translateZ(20px)">
-            <div class="bb-card p-3"><p class="font-display font-black text-2xl text-white">{{ current_user.orders|length }}</p><p class="text-[11px] text-neutral-500">Orders</p></div>
-            <div class="bb-card p-3"><p class="font-display font-black text-lg text-white">{{ current_user.created_at.strftime('%b %Y') if current_user.created_at else '—' }}</p><p class="text-[11px] text-neutral-500">Member since</p></div>
+        <div class="grid grid-cols-2 gap-3 w-full mt-2">
+            <div class="bb-card p-3"><p class="font-display font-extrabold text-2xl text-ink">{{ current_user.orders|length }}</p><p class="text-[11px] text-stone-500">Orders</p></div>
+            <div class="bb-card p-3"><p class="font-display font-extrabold text-lg text-ink">{{ current_user.created_at.strftime('%b %Y') if current_user.created_at else '—' }}</p><p class="text-[11px] text-stone-500">Member since</p></div>
         </div>
     </aside>
 
@@ -32,8 +30,8 @@
         {{ ui.csrf() }}
         <div class="mb-2">
             <span class="bb-eyebrow">Account settings</span>
-            <h2 class="font-display font-black text-3xl text-white mt-2">Your details</h2>
-            <p class="text-sm text-neutral-400 mt-1">We use these to get your food to the right door.</p>
+            <h2 class="font-display font-extrabold text-3xl text-ink mt-2">Your details</h2>
+            <p class="text-sm text-stone-500 mt-1">We use these to get your food to the right door.</p>
         </div>
 
         <div>

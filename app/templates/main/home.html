@@ -1,125 +1,127 @@
 {% extends "base.html" %}
 {% import "_macros.html" as ui with context %}
 
-{% block title %}BiteBuddy — Hot food, delivered in 3D{% endblock %}
+{% block title %}BiteBuddy — Fresh food, delivered hot{% endblock %}
 {% block main_class %}{% endblock %}
 
 {% block content %}
 <!-- ═════════════ HERO ═════════════ -->
-<section class="bb-hero overflow-hidden" data-food3d-scroll>
-    <div class="bb-floor" aria-hidden="true"></div>
-    <div class="relative z-[2] max-w-7xl w-full mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-6 lg:gap-4 items-center">
+<section class="bb-hero overflow-hidden">
+    <div class="relative max-w-7xl w-full mx-auto px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center">
 
         <!-- Copy -->
-        <div class="flex flex-col gap-7 text-center lg:text-left order-2 lg:order-1">
+        <div class="flex flex-col gap-7 text-center lg:text-left">
             <div class="flex justify-center lg:justify-start" data-reveal>
-                <span class="bb-chip bb-chip--brand"><span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399] animate-pulse"></span> Kitchen open · delivering now</span>
+                <span class="bb-chip"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Kitchen open · delivering across Islamabad</span>
             </div>
 
             <h1 class="bb-hero__title">
-                <span class="line"><span>Crave it.</span></span>
-                <span class="line"><span class="bb-gradient-text">Tap it.</span></span>
-                <span class="line"><span>Bite it.</span></span>
+                <span class="line"><span>Fresh food,</span></span>
+                <span class="line"><span>made to order,</span></span>
+                <span class="line"><span class="bb-gradient-text">delivered hot.</span></span>
             </h1>
 
-            <p class="text-base md:text-lg text-neutral-400 max-w-lg mx-auto lg:mx-0 leading-relaxed" data-reveal style="--reveal-delay:.25s">
-                Smash burgers, stone-baked pizza and crispy chicken — built fresh the moment you order and tracked live all the way to your door.
+            <p class="text-base md:text-lg text-stone-600 max-w-lg mx-auto lg:mx-0 leading-relaxed" data-reveal style="--reveal-delay:.2s">
+                Smash burgers, stone-baked pizza and crispy chicken, cooked the moment you order and tracked live all the way to your door.
             </p>
 
-            <div class="flex flex-wrap gap-3 justify-center lg:justify-start" data-reveal style="--reveal-delay:.35s">
-                <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg" data-magnetic><i class="bi bi-lightning-charge-fill"></i> Order now</a>
+            <div class="flex flex-wrap gap-3 justify-center lg:justify-start" data-reveal style="--reveal-delay:.3s">
+                <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg">Order now <i class="bi bi-arrow-right"></i></a>
                 {% if not current_user.is_authenticated %}
-                <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--ghost bb-btn--lg"><i class="bi bi-person-plus"></i> Create account</a>
+                <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--ghost bb-btn--lg">Create account</a>
                 {% else %}
-                <a href="{{ url_for('orders.history') if not current_user.is_admin else url_for('admin.dashboard') }}" class="bb-btn bb-btn--ghost bb-btn--lg"><i class="bi bi-geo-alt"></i> {{ 'Track orders' if not current_user.is_admin else 'Dashboard' }}</a>
+                <a href="{{ url_for('orders.history') if not current_user.is_admin else url_for('admin.dashboard') }}" class="bb-btn bb-btn--ghost bb-btn--lg">{{ 'Track my orders' if not current_user.is_admin else 'Open dashboard' }}</a>
                 {% endif %}
             </div>
 
-            <div class="flex flex-wrap items-center justify-center lg:justify-start gap-8 pt-2" data-reveal style="--reveal-delay:.45s">
-                <div class="bb-hero__stat"><strong><span data-count="30">30</span><span class="text-brand-orange">min</span></strong><span>Average delivery</span></div>
-                <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
-                <div class="bb-hero__stat"><strong><span data-count="{{ item_count }}">{{ item_count }}</span><span class="text-brand-orange">+</span></strong><span>Dishes on the menu</span></div>
-                <div class="w-px h-10 bg-white/10 hidden sm:block"></div>
-                <div class="bb-hero__stat"><strong><span data-count="4.9" data-decimals="1">4.9</span><i class="bi bi-star-fill text-brand-yellow text-xl ml-1"></i></strong><span>Customer rating</span></div>
+            <div class="flex flex-wrap items-center justify-center lg:justify-start gap-x-10 gap-y-5 pt-3" data-reveal style="--reveal-delay:.4s">
+                <div class="bb-hero__stat"><strong><span data-count="30">30</span> min</strong><span>Average delivery</span></div>
+                <div class="bb-hero__stat"><strong><span data-count="{{ item_count }}">{{ item_count }}</span>+</strong><span>Dishes on the menu</span></div>
+                <div class="bb-hero__stat"><strong><span data-count="4.9" data-decimals="1">4.9</span> <i class="bi bi-star-fill text-amber-500 text-lg"></i></strong><span>Customer rating</span></div>
             </div>
         </div>
 
-        <!-- 3D stage -->
-        <div class="relative order-1 lg:order-2 h-[380px] sm:h-[520px] lg:h-[640px]" data-reveal="zoom">
-            <div class="bb3d__glow" aria-hidden="true"></div>
-            <div class="bb3d" id="hero-stage" data-food3d data-food3d-mode="hero" data-food3d-model="burger">
-                <img class="bb3d__fallback" src="{{ asset('images/hero_burger.webp') }}" alt="A stacked BiteBuddy burger" width="640" height="640">
-                <div class="bb3d__labels" aria-hidden="true"></div>
-                <div class="bb3d__hint"><i class="bi bi-hand-index-thumb"></i> Drag to spin · scroll to explode</div>
+        <!-- Photo composition -->
+        <div class="bb-hero-media max-w-md lg:max-w-none mx-auto w-full lg:pl-8" data-reveal="zoom" style="--reveal-delay:.1s">
+            <div class="bb-hero-media__main">
+                <img src="{{ asset('images/hero_main.jpg') }}" alt="A double smash burger with cheese, pickles and special sauce" width="1400" height="1600" fetchpriority="high" data-parallax="-0.06">
+            </div>
+            <div class="bb-hero-media__inset hidden sm:block">
+                <img src="{{ asset('images/hero_pizza.jpg') }}" alt="A stone-baked pizza" loading="lazy" decoding="async">
             </div>
 
-            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-[3] flex items-center gap-2">
-                <div class="bb-segment" role="group" aria-label="Choose a 3D model">
-                    <span class="bb-segment__pill"></span>
-                    <button type="button" class="is-active" aria-pressed="true" data-food3d-switch="burger" data-target="#hero-stage" data-fallback="{{ asset('images/hero_burger.webp') }}">🍔 Burger</button>
-                    <button type="button" aria-pressed="false" data-food3d-switch="pizza" data-target="#hero-stage" data-fallback="{{ asset('images/hero_pizza.webp') }}">🍕 Pizza</button>
+            <div class="bb-float-card bb-float-card--a right-3 sm:-right-4 top-8">
+                <span class="bb-float-card__icon bg-orange-50 text-brand-orange"><i class="bi bi-bicycle"></i></span>
+                <div>
+                    <b>Your order is on the way</b>
+                    <small>Rider is about 6 min away</small>
+                    <div class="bb-mini-progress"><span></span></div>
                 </div>
-                <button type="button" class="bb-btn bb-btn--ghost bb-btn--sm !py-3" data-food3d-explode data-target="#hero-stage" aria-pressed="false">
-                    <i class="bi bi-layers-half"></i> <span data-label>Explode</span>
-                </button>
+            </div>
+
+            <div class="bb-float-card bb-float-card--b right-3 sm:right-8 -bottom-5">
+                <div class="bb-avatars">
+                    <img src="{{ url_for('static', filename='images/item_smash.jpg') }}" alt="" loading="lazy">
+                    <img src="{{ url_for('static', filename='images/item_pepperoni.jpg') }}" alt="" loading="lazy">
+                    <img src="{{ url_for('static', filename='images/item_2pc.jpg') }}" alt="" loading="lazy">
+                </div>
+                <div>
+                    <b><i class="bi bi-star-fill text-amber-500"></i> 4.9 average rating</b>
+                    <small>From our regular customers</small>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ═════════════ MARQUEE ═════════════ -->
-<div class="bb-marquee relative z-[2] mb-24" aria-hidden="true">
-    <div class="bb-marquee__track">
-        {% for _ in range(2) %}
-        <span class="bb-marquee__item is-solid">Smash Burgers <span class="emoji">🍔</span></span>
-        <span class="bb-marquee__item">Stone-baked Pizza <span class="emoji">🍕</span></span>
-        <span class="bb-marquee__item is-solid">Crispy Chicken <span class="emoji">🍗</span></span>
-        <span class="bb-marquee__item">Loaded Wraps <span class="emoji">🌯</span></span>
-        <span class="bb-marquee__item is-solid">Thick Shakes <span class="emoji">🥤</span></span>
-        <span class="bb-marquee__item">Molten Desserts <span class="emoji">🍫</span></span>
-        {% endfor %}
-    </div>
-</div>
-
 <div class="max-w-7xl mx-auto px-4 sm:px-6">
+
+    <!-- ═════════════ TRUST STRIP ═════════════ -->
+    <section class="mb-24" data-reveal>
+        <div class="bb-trust">
+            <div><i class="bi bi-basket2"></i><span><b>Fresh ingredients</b><small>Prepped daily, never frozen</small></span></div>
+            <div><i class="bi bi-stopwatch"></i><span><b>~30 minute delivery</b><small>Hot from our kitchen</small></span></div>
+            <div><i class="bi bi-geo-alt"></i><span><b>Live order tracking</b><small>Every step, in real time</small></span></div>
+            <div><i class="bi bi-credit-card-2-front"></i><span><b>Cash or card</b><small>Pay the way you like</small></span></div>
+        </div>
+    </section>
 
     <!-- ═════════════ CATEGORIES ═════════════ -->
     <section class="bb-section">
-        {{ ui.section_head('Explore the kitchen', 'Pick your <span class="bb-gradient-text">craving</span>', url_for('menu.browse'), 'Full menu') }}
+        {{ ui.section_head('Explore the menu', 'What are you <span class="bb-gradient-text">craving?</span>', url_for('menu.browse'), 'Full menu') }}
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
             {% for cat in categories %}
-            {{ ui.category_card(cat, delay=loop.index0 * 0.06) }}
+            {{ ui.category_card(cat, delay=loop.index0 * 0.05) }}
             {% else %}
-            <p class="text-neutral-500 col-span-full text-center py-8">No categories available yet.</p>
+            <p class="text-stone-500 col-span-full text-center py-8">No categories available yet.</p>
             {% endfor %}
         </div>
     </section>
 
     <!-- ═════════════ DEALS ═════════════ -->
     <section class="bb-section">
-        {{ ui.section_head('Limited-time offers', 'Deals worth the <span class="bb-gold-text">hype</span>', eyebrow_icon='bi-lightning-charge-fill') }}
+        {{ ui.section_head('Limited-time offers', 'This week\'s <span class="bb-gradient-text">deals</span>') }}
         {% set deals = [
-            ('Family Feast', '10-piece crispy bucket + 2 large fries + 1.5L drink', 3120, 2500, 'item_10pc.jpg', 'SAVE 20%', 'Best seller', 'chicken'),
-            ('Burger Duo', '2 classic smash burgers + 2 soft drinks + fries', 2300, 1850, 'item_smash.jpg', 'HOT DEAL', 'Trending', 'burger'),
-            ('Pizza Party', 'Large supreme pizza + 6 spicy wings + 1L cola', 2750, 2200, 'item_supreme.jpg', 'POPULAR', 'Recommended', 'pizza'),
-            ('Wrap Pack', '2 chicken wraps + onion rings + 2 mint lemonades', 1800, 1500, 'item_wrap.jpg', 'LUNCH', 'Combo', 'wrap'),
+            ('Family Feast', '10-piece crispy bucket, 2 large fries and a 1.5L drink', 3120, 2500, 'item_10pc.jpg', 'Save 20%', 'Best seller', 'chicken'),
+            ('Burger Duo', '2 classic smash burgers, 2 soft drinks and fries', 2300, 1850, 'item_smash.jpg', 'Save 20%', 'Trending', 'burger'),
+            ('Pizza Party', 'Large supreme pizza, 6 spicy wings and a 1L cola', 2750, 2200, 'item_supreme.jpg', 'Save 20%', 'Recommended', 'pizza'),
+            ('Wrap Pack', '2 chicken wraps, onion rings and 2 mint lemonades', 1800, 1500, 'item_wrap.jpg', 'Save 17%', 'Lunch combo', 'wrap'),
         ] %}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {% for name, desc, was, now, img, badge, tag, q in deals %}
-            <article class="bb-deal" data-tilt data-tilt-max="8" data-reveal style="--reveal-delay: {{ loop.index0 * 0.08 }}s">
+            <article class="bb-deal" data-reveal style="--reveal-delay: {{ loop.index0 * 0.07 }}s">
                 <img class="bb-deal__img" src="{{ url_for('static', filename='images/' ~ img) }}" alt="{{ name }}" loading="lazy" decoding="async">
-                <div class="bb-glare"></div>
                 <span class="bb-deal__badge">{{ badge }}</span>
                 <div class="bb-deal__body">
-                    <span class="bb-chip w-max"><i class="bi bi-fire text-brand-orange"></i> {{ tag }}</span>
-                    <h3 class="font-display font-black text-2xl text-white leading-tight">{{ name }}</h3>
-                    <p class="text-sm text-neutral-300 leading-relaxed">{{ desc }}</p>
+                    <span class="bb-chip w-max">{{ tag }}</span>
+                    <h3 class="font-display font-bold text-2xl leading-tight">{{ name }}</h3>
+                    <p class="text-sm text-white/80 leading-relaxed">{{ desc }}</p>
                     <div class="flex items-end justify-between gap-3 pt-2">
                         <div>
-                            <span class="block text-xs text-neutral-400 line-through">Rs. {{ was }}</span>
+                            <span class="block text-xs text-white/60 line-through">Rs. {{ was }}</span>
                             <span class="bb-price text-2xl"><small>Rs.</small>{{ now }}</span>
                         </div>
-                        <a href="{{ url_for('menu.search', q=q) }}" class="bb-btn bb-btn--light bb-btn--sm">Grab it <i class="bi bi-arrow-up-right"></i></a>
+                        <a href="{{ url_for('menu.search', q=q) }}" class="bb-btn bb-btn--light bb-btn--sm">Order <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </article>
@@ -129,27 +131,19 @@
 
     <!-- ═════════════ HOW IT WORKS ═════════════ -->
     <section class="bb-section">
-        {{ ui.section_head('Door to door in three taps', 'How <span class="bb-gradient-text">BiteBuddy</span> works') }}
+        {{ ui.section_head('How it works', 'From our kitchen to your door') }}
         {% set steps = [
-            ('bi-grid-1x2-fill', 'bi-hand-index-thumb-fill', 'Pick your bites', 'Browse the full menu, customise sizes and add-ons, and preview burgers and pizzas in 3D.'),
-            ('bi-fire', 'bi-egg-fried', 'We cook it fresh', 'Your order hits the grill the moment you check out — never pre-made, never sitting under a lamp.'),
-            ('bi-bicycle', 'bi-geo-alt-fill', 'Track it live', 'Follow every step from kitchen to doorstep with live order tracking. Pay cash or card.'),
+            ('bi-phone', 'Choose your meal', 'Browse the menu, pick sizes and add-ons, and check out in a few taps.'),
+            ('bi-fire', 'We cook it fresh', 'Your order goes straight to the grill. Nothing is pre-made or kept waiting under a lamp.'),
+            ('bi-geo-alt', 'Track it live', 'Follow your order from kitchen to doorstep, and pay by cash or card.'),
         ] %}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {% for front, back, title, text in steps %}
-            <div class="bb-step bb-card" data-tilt data-reveal style="--reveal-delay: {{ loop.index0 * 0.1 }}s">
-                <div class="bb-glare"></div>
-                <span class="bb-step__num">0{{ loop.index }}</span>
-                <div class="bb-cube" aria-hidden="true">
-                    <span class="bb-cube__face bb-cube__face--front"><i class="bi {{ front }}"></i></span>
-                    <span class="bb-cube__face bb-cube__face--back"><i class="bi {{ back }}"></i></span>
-                    <span class="bb-cube__face bb-cube__face--right"></span>
-                    <span class="bb-cube__face bb-cube__face--left"></span>
-                    <span class="bb-cube__face bb-cube__face--top"></span>
-                    <span class="bb-cube__face bb-cube__face--bottom"></span>
-                </div>
-                <h3 class="font-display font-black text-xl text-white mb-2" style="transform: translateZ(30px)">{{ title }}</h3>
-                <p class="text-sm text-neutral-400 leading-relaxed" style="transform: translateZ(20px)">{{ text }}</p>
+            {% for icon, title, text in steps %}
+            <div class="bb-step bb-card" data-reveal style="--reveal-delay: {{ loop.index0 * 0.08 }}s">
+                <span class="bb-step__num">STEP 0{{ loop.index }}</span>
+                <div class="bb-step__icon"><i class="bi {{ icon }}"></i></div>
+                <h3 class="font-display font-bold text-xl text-ink mb-2">{{ title }}</h3>
+                <p class="text-sm text-stone-600 leading-relaxed">{{ text }}</p>
             </div>
             {% endfor %}
         </div>
@@ -157,38 +151,34 @@
 
     <!-- ═════════════ POPULAR ═════════════ -->
     <section class="bb-section">
-        {{ ui.section_head('Most ordered this week', 'Popular <span class="bb-gradient-text">right now</span>', url_for('menu.browse'), 'See everything', 'bi-fire') }}
+        {{ ui.section_head('Most ordered this week', 'Popular <span class="bb-gradient-text">right now</span>', url_for('menu.browse'), 'See everything') }}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {% for item in popular_items %}
-            {{ ui.food_card(item, delay=(loop.index0 % 4) * 0.07) }}
+            {{ ui.food_card(item, delay=(loop.index0 % 4) * 0.06) }}
             {% else %}
-            <p class="text-neutral-500 col-span-full text-center py-8">No items available yet.</p>
+            <p class="text-stone-500 col-span-full text-center py-8">No items available yet.</p>
             {% endfor %}
         </div>
     </section>
 
     <!-- ═════════════ CTA ═════════════ -->
     <section class="bb-section !mb-8">
-        <div class="bb-cta" data-reveal="zoom">
-            <span class="bb-cta__food right-[6%] top-[12%]" style="animation-delay:-1s">🍔</span>
-            <span class="bb-cta__food right-[22%] bottom-[10%] hidden md:block" style="animation-delay:-3s">🍟</span>
-            <span class="bb-cta__food right-[38%] top-[8%] hidden lg:block" style="animation-delay:-2s">🥤</span>
-            <div class="relative max-w-xl">
-                <span class="bb-chip mb-5 !bg-black/20 !border-white/20"><i class="bi bi-gift-fill"></i> Free delivery on your first order</span>
-                <h2 class="font-display font-black text-4xl md:text-6xl leading-[.95] tracking-tight text-white">Hungry already?<br>Let's fix that.</h2>
-                <p class="text-white/80 mt-4 mb-8 text-base md:text-lg">Your next favourite meal is a few taps away. Hot, fast, and exactly how you like it.</p>
+        <div class="bb-cta" data-reveal>
+            <div class="bb-cta__copy">
+                <span class="inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-orange-600 mb-5"><i class="bi bi-gift"></i> Free delivery on your first order</span>
+                <h2 class="font-display font-extrabold text-4xl md:text-5xl leading-[1.05] tracking-tight">Hungry? Your next meal is a few taps away.</h2>
+                <p class="text-white/70 mt-4 mb-8 text-base md:text-lg max-w-md">Hot, fresh and exactly how you like it. Order now and we'll start cooking.</p>
                 <div class="flex flex-wrap gap-3">
-                    <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--light bb-btn--lg" data-magnetic><i class="bi bi-bag-heart-fill"></i> Start your order</a>
+                    <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--primary bb-btn--lg">Start your order <i class="bi bi-arrow-right"></i></a>
                     {% if not current_user.is_authenticated %}
-                    <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--lg !bg-black/25 !text-white hover:!bg-black/40">Join BiteBuddy</a>
+                    <a href="{{ url_for('auth.register') }}" class="bb-btn bb-btn--lg !bg-white/10 !text-white hover:!bg-white/20">Join BiteBuddy</a>
                     {% endif %}
                 </div>
+            </div>
+            <div class="bb-cta__media">
+                <img src="{{ asset('images/auth_panel.jpg') }}" alt="A platter of grilled kebabs, chicken and vegetables" loading="lazy" decoding="async" data-parallax="-0.08">
             </div>
         </div>
     </section>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script type="module" src="{{ asset('js/food3d.js') }}"></script>
 {% endblock %}

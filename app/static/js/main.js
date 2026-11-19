@@ -97,7 +97,7 @@
             el.classList.add('is-in');
             // once the entrance transition is over, let tilt/hover own `transform` again
             const delay = parseFloat(getComputedStyle(el).getPropertyValue('--reveal-delay')) || 0;
-            setTimeout(() => el.classList.add('is-settled'), (delay + 1.3) * 1000);
+            setTimeout(() => el.classList.add('is-settled'), (delay + 1) * 1000);
         };
         if (!('IntersectionObserver' in window) || reducedMotion) {
             revealEls.forEach(settle);
@@ -113,59 +113,47 @@
     // hero headline entrance
     requestAnimationFrame(() => document.body.classList.add('is-loaded'));
 
-    /* ── 3D tilt cards with glare ───────────────────────────────────────── */
-    if (finePointer && !reducedMotion) {
-        $$('[data-tilt]').forEach((card) => {
-            const max = parseFloat(card.dataset.tiltMax || '10');
-            let raf = 0;
-            let rect = null;
-            const move = (e) => {
-                rect = rect || card.getBoundingClientRect();
-                const px = (e.clientX - rect.left) / rect.width;
-                const py = (e.clientY - rect.top) / rect.height;
-                cancelAnimationFrame(raf);
-                raf = requestAnimationFrame(() => {
-                    card.classList.add('is-tilting');
-                    card.style.transform = `perspective(900px) rotateX(${(0.5 - py) * max}deg) rotateY(${(px - 0.5) * max}deg) translate3d(0, -6px, 0)`;
-                    card.style.setProperty('--gx', `${px * 100}%`);
-                    card.style.setProperty('--gy', `${py * 100}%`);
-                });
-            };
-            card.addEventListener('pointerenter', () => { rect = card.getBoundingClientRect(); });
-            card.addEventListener('pointermove', move);
-            card.addEventListener('pointerleave', () => {
-                cancelAnimationFrame(raf);
-                rect = null;
-                card.classList.remove('is-tilting');
-                card.style.transform = '';
+    /* ── Images fade in once decoded (no pop-in) ────────────────────────── */
+    $$('img.bb-fade').forEach((img) => {
+        const done = () => img.classList.add('is-loaded');
+        if (img.complete && img.naturalWidth) done();
+        else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
+    });
+
+    /* ── Gentle scroll parallax: [data-parallax="-0.06"] ────────────────── */
+    const parallaxEls = $$('[data-parallax]');
+    if (parallaxEls.length && !reducedMotion) {
+        let ticking = false;
+        const update = () => {
+            ticking = false;
+            const vh = window.innerHeight;
+            parallaxEls.forEach((el) => {
+                const host = el.parentElement.getBoundingClientRect();
+                if (host.bottom < -100 || host.top > vh + 100) return;
+                // the image is taller than its frame; drift within that slack so no edge ever shows
+                const slack = Math.max(0, el.offsetHeight - host.height) / 2;
+                const raw = (host.top + host.height / 2 - vh / 2) * parseFloat(el.dataset.parallax);
+                const offset = Math.max(-slack, Math.min(slack, raw));
+                el.style.transform = `translate3d(0, ${(offset - slack).toFixed(1)}px, 0)`;
             });
-        });
+        };
+        const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+        window.addEventListener('scroll', request, { passive: true });
+        window.addEventListener('resize', request);
+        update();
     }
 
-    /* ── Magnetic buttons ───────────────────────────────────────────────── */
+    /* ── Product photo zoom follows the pointer ─────────────────────────── */
     if (finePointer && !reducedMotion) {
-        $$('[data-magnetic]').forEach((el) => {
-            el.addEventListener('pointermove', (e) => {
-                const r = el.getBoundingClientRect();
-                const x = (e.clientX - r.left - r.width / 2) * 0.25;
-                const y = (e.clientY - r.top - r.height / 2) * 0.35;
-                el.style.transform = `translate(${x}px, ${y}px)`;
+        $$('[data-zoom]').forEach((box) => {
+            box.addEventListener('pointerenter', () => box.classList.add('is-zooming'));
+            box.addEventListener('pointerleave', () => box.classList.remove('is-zooming'));
+            box.addEventListener('pointermove', (e) => {
+                const r = box.getBoundingClientRect();
+                box.style.setProperty('--zx', `${((e.clientX - r.left) / r.width) * 100}%`);
+                box.style.setProperty('--zy', `${((e.clientY - r.top) / r.height) * 100}%`);
             });
-            el.addEventListener('pointerleave', () => { el.style.transform = ''; });
         });
-    }
-
-    /* ── Cursor spotlight ───────────────────────────────────────────────── */
-    const spot = $('.bb-spotlight');
-    if (spot && finePointer && !reducedMotion) {
-        let sraf = 0;
-        window.addEventListener('pointermove', (e) => {
-            cancelAnimationFrame(sraf);
-            sraf = requestAnimationFrame(() => {
-                spot.style.setProperty('--cx', `${e.clientX}px`);
-                spot.style.setProperty('--cy', `${e.clientY}px`);
-            });
-        }, { passive: true });
     }
 
     /* ── Animated counters ──────────────────────────────────────────────── */
@@ -222,10 +210,10 @@
         const dx = to.left + to.width / 2 - (from.left + from.width / 2);
         const dy = to.top + to.height / 2 - (from.top + from.height / 2);
         const anim = clone.animate([
-            { transform: 'translate(0,0) scale(1) rotate(0)', opacity: 1, borderRadius: '18px' },
-            { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 140}px) scale(.7) rotate(-25deg)`, opacity: 1, offset: 0.55 },
-            { transform: `translate(${dx}px, ${dy}px) scale(.12) rotate(-60deg)`, opacity: 0.4, borderRadius: '50%' },
-        ], { duration: 900, easing: 'cubic-bezier(.5,0,.3,1)' });
+            { transform: 'translate(0,0) scale(1)', opacity: 1, borderRadius: '16px' },
+            { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 60}px) scale(.55)`, opacity: 0.95, offset: 0.5 },
+            { transform: `translate(${dx}px, ${dy}px) scale(.12)`, opacity: 0, borderRadius: '50%' },
+        ], { duration: 750, easing: 'cubic-bezier(.45,0,.25,1)' });
         anim.onfinish = () => clone.remove();
     };
 
@@ -325,7 +313,7 @@
             input.setCustomValidity(ok ? '' : 'Passwords do not match');
             if (hint) {
                 hint.textContent = input.value ? (ok ? 'Passwords match' : 'Passwords do not match') : '';
-                hint.style.color = ok ? '#4ade80' : '#f87171';
+                hint.style.color = ok ? '#15803d' : '#dc2626';
             }
         };
         input.addEventListener('input', check);
@@ -382,51 +370,7 @@
         document.fonts && document.fonts.ready.then(() => BB.syncSegment(seg));
     });
 
-    /* ── Confetti burst (order confirmation) ────────────────────────────── */
-    BB.confetti = () => {
-        if (reducedMotion) return;
-        const canvas = document.createElement('canvas');
-        canvas.className = 'bb-confetti';
-        document.body.appendChild(canvas);
-        const ctx = canvas.getContext('2d');
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const resize = () => { canvas.width = innerWidth * dpr; canvas.height = innerHeight * dpr; };
-        resize();
-        const colors = ['#ff6b35', '#ff2d55', '#ffb800', '#4ade80', '#ffffff', '#ff9a3d'];
-        const parts = Array.from({ length: 160 }, () => ({
-            x: innerWidth / 2 + (Math.random() - 0.5) * 120,
-            y: innerHeight * 0.35,
-            vx: (Math.random() - 0.5) * 16,
-            vy: -Math.random() * 16 - 6,
-            r: Math.random() * Math.PI,
-            vr: (Math.random() - 0.5) * 0.4,
-            w: 6 + Math.random() * 8,
-            h: 8 + Math.random() * 10,
-            c: colors[(Math.random() * colors.length) | 0],
-        }));
-        const start = performance.now();
-        const frame = (now) => {
-            const t = now - start;
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            ctx.clearRect(0, 0, innerWidth, innerHeight);
-            parts.forEach((p) => {
-                p.vy += 0.42; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
-                ctx.save();
-                ctx.translate(p.x, p.y);
-                ctx.rotate(p.r);
-                ctx.scale(1, Math.cos(p.r * 2));
-                ctx.fillStyle = p.c;
-                ctx.globalAlpha = Math.max(0, 1 - t / 3200);
-                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-                ctx.restore();
-            });
-            if (t < 3300) requestAnimationFrame(frame); else canvas.remove();
-        };
-        requestAnimationFrame(frame);
-    };
-    if (document.querySelector('[data-confetti]')) setTimeout(BB.confetti, 350);
-
-    /* ── 3D credit card preview (payment page) ──────────────────────────── */
+    /* ── Credit card preview (payment page) ──────────────────────────── */
     const ccard = $('.bb-ccard');
     if (ccard) {
         const bind = (inputId, outId, fallback, fmt = (v) => v) => {

@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto">
-    <div class="bb-auth" data-reveal="zoom">
+    <div class="bb-auth" data-reveal>
         {% with headline='Your table is<br><span class="bb-gradient-text">always ready.</span>', sub='Join BiteBuddy to order in seconds, save your delivery address and follow every order live.' %}
         {% include "auth/_stage.html" %}
         {% endwith %}
@@ -13,8 +13,8 @@
         <div class="bb-auth__form">
             <div class="mb-7">
                 <span class="bb-eyebrow">Create account</span>
-                <h1 class="font-display font-black text-3xl md:text-4xl text-white mt-3 tracking-tight">Join BiteBuddy</h1>
-                <p class="text-sm text-neutral-400 mt-2">Already a member? <a href="{{ url_for('auth.login') }}" class="text-brand-orange font-bold hover:underline">Sign in</a></p>
+                <h1 class="font-display font-extrabold text-3xl md:text-4xl text-ink mt-3 tracking-tight">Join BiteBuddy</h1>
+                <p class="text-sm text-stone-500 mt-2">Already a member? <a href="{{ url_for('auth.login') }}" class="text-brand-orange font-bold hover:underline">Sign in</a></p>
             </div>
 
             <form method="POST" action="{{ url_for('auth.register') }}" class="flex flex-col gap-4" data-loading>
@@ -48,7 +48,7 @@
                 </div>
 
                 <div>
-                    <label for="address" class="bb-label">Delivery address <span class="text-neutral-500 font-medium">(optional)</span></label>
+                    <label for="address" class="bb-label">Delivery address <span class="text-stone-500 font-medium">(optional)</span></label>
                     <div class="bb-field bb-field--textarea">
                         <i class="bi bi-geo-alt bb-field__icon"></i>
                         <textarea id="address" name="address" class="bb-input" rows="2" autocomplete="street-address" placeholder="House, street, area, city">{{ address|default('') }}</textarea>
@@ -81,13 +81,10 @@
                 <button type="submit" class="bb-btn bb-btn--primary bb-btn--lg bb-btn--block mt-3">
                     <i class="bi bi-stars"></i> Create my account
                 </button>
-                <p class="text-xs text-neutral-500 text-center">By joining you agree to receive order updates by email and SMS.</p>
+                <p class="text-xs text-stone-500 text-center">By joining you agree to receive order updates by email and SMS.</p>
             </form>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script type="module" src="{{ asset('js/food3d.js') }}"></script>
-{% endblock %}

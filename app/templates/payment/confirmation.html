@@ -2,7 +2,7 @@
 {% block title %}Order confirmed — BiteBuddy{% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto py-6" data-confetti>
+<div class="max-w-xl mx-auto py-6">
     <div class="bb-glass p-8 sm:p-12 text-center flex flex-col items-center gap-7" data-reveal="zoom">
         <div class="bb-success-orb" aria-hidden="true">
             <span class="bb-success-orb__ring"></span>
@@ -11,26 +11,26 @@
         </div>
 
         <div>
-            <h1 class="font-display font-black text-4xl text-white tracking-tight">
+            <h1 class="font-display font-extrabold text-4xl text-ink tracking-tight">
                 {% if order.payment_method == 'cash' %}Order confirmed!{% else %}Payment successful!{% endif %}
             </h1>
-            <p class="text-neutral-400 mt-3">
-                Order <b class="text-white">#{{ order.id }}</b> is in the kitchen.
+            <p class="text-stone-500 mt-3">
+                Order <b class="text-ink">#{{ order.id }}</b> is in the kitchen.
                 {% if order.payment_method == 'cash' %}Pay <b class="text-brand-orange">Rs. {{ "%.0f"|format(order.total_amount) }}</b> in cash when it arrives.{% else %}Your card payment has been processed.{% endif %}
             </p>
         </div>
 
         <div class="w-full bb-card p-5 flex flex-col gap-3 text-sm text-left">
             {% if order.payment %}
-            <div class="flex justify-between"><span class="text-neutral-400">Transaction</span><span class="font-mono text-brand-orange text-xs">{{ order.payment.transaction_id }}</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Transaction</span><span class="font-mono text-brand-orange text-xs">{{ order.payment.transaction_id }}</span></div>
             {% endif %}
-            <div class="flex justify-between"><span class="text-neutral-400">Amount</span><span class="text-white font-bold">Rs. {{ "%.0f"|format(order.total_amount) }}</span></div>
-            <div class="flex justify-between"><span class="text-neutral-400">Payment</span><span class="text-white font-semibold">{{ 'Cash on delivery' if order.payment_method == 'cash' else 'Card' }}</span></div>
-            <div class="flex justify-between"><span class="text-neutral-400">Deliver to</span><span class="text-white font-semibold text-right max-w-[60%] line-clamp-2">{{ order.delivery_address }}</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Amount</span><span class="text-ink font-bold">Rs. {{ "%.0f"|format(order.total_amount) }}</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Payment</span><span class="text-ink font-semibold">{{ 'Cash on delivery' if order.payment_method == 'cash' else 'Card' }}</span></div>
+            <div class="flex justify-between"><span class="text-stone-500">Deliver to</span><span class="text-ink font-semibold text-right max-w-[60%] line-clamp-2">{{ order.delivery_address }}</span></div>
         </div>
 
-        <p class="w-full text-sm text-neutral-300 rounded-2xl px-5 py-4 flex items-center gap-3 bg-brand-orange/5 border border-brand-orange/15">
-            <span class="text-2xl">👨‍🍳</span> The chef is firing up the grill — follow every step live.
+        <p class="w-full text-sm text-stone-600 rounded-2xl px-5 py-4 flex items-center gap-3 bg-brand-orange/5 border border-brand-orange/15">
+            <i class="bi bi-fire text-xl text-brand-orange"></i> The chef is firing up the grill — follow every step live.
         </p>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">

@@ -5,11 +5,10 @@
 <div class="min-h-[60vh] grid place-items-center text-center py-10">
     <div class="flex flex-col items-center gap-6" data-reveal="zoom">
         <div class="relative">
-            <span class="font-display font-black text-[9rem] md:text-[12rem] leading-none bb-gradient-text tracking-tighter">404</span>
-            <span class="absolute -right-6 top-4 text-6xl" style="animation: bbFloat 4s ease-in-out infinite">🍔</span>
+            <span class="font-display font-extrabold text-[9rem] md:text-[12rem] leading-none bb-gradient-text tracking-tighter">404</span>
         </div>
-        <h1 class="font-display font-black text-3xl text-white -mt-4">Someone ate this page.</h1>
-        <p class="text-neutral-400 max-w-md">The page you're looking for doesn't exist — but plenty of delicious things do.</p>
+        <h1 class="font-display font-extrabold text-3xl text-ink -mt-4">Someone ate this page.</h1>
+        <p class="text-stone-500 max-w-md">The page you're looking for doesn't exist — but plenty of delicious things do.</p>
         <div class="flex flex-wrap gap-3 justify-center">
             <a href="{{ url_for('main.home') }}" class="bb-btn bb-btn--primary"><i class="bi bi-house-door-fill"></i> Go home</a>
             <a href="{{ url_for('menu.browse') }}" class="bb-btn bb-btn--ghost"><i class="bi bi-grid-fill"></i> Browse menu</a>
